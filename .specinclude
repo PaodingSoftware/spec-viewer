@@ -1,0 +1,16 @@
+# Spec Include File
+# Only serve files relevant to GitHub spec-kit and Claude Code
+
+# Configuration directories
+.claude/
+.github/
+.specify/
+
+# Documentation directories
+spec/
+docs/
+
+# Specific documentation files
+README.md
+AGENTS.md
+CLAUDE.md

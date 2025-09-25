@@ -1,0 +1,6 @@
+# Demo Include File
+# Only serve these files for the demo
+
+*.md
+*.json
+api/

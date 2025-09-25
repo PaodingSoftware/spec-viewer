@@ -1,0 +1,31 @@
+{
+  "name": "spec-viewer",
+  "version": "1.0.0",
+  "description": "A CLI tool for viewing spec-kit generated documentation",
+  "main": "index.js",
+  "bin": {
+    "spec-viewer": "./bin/spec-viewer.js"
+  },
+  "scripts": {
+    "demo": "node bin/spec-viewer.js demo --port 3003",
+    "install-global": "npm install -g ."
+  },
+  "keywords": [
+    "spec-kit",
+    "documentation",
+    "viewer",
+    "markdown",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "commander": "^11.0.0",
+    "chokidar": "^3.5.3",
+    "marked": "^9.1.2",
+    "socket.io": "^4.7.2",
+    "ignore": "^5.2.4",
+    "mime-types": "^2.1.35"
+  }
+}

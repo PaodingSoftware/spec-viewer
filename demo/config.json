@@ -1,0 +1,44 @@
+{
+  "name": "Spec Viewer Demo",
+  "version": "1.0.0",
+  "description": "Beautiful documentation viewer with Bulma and FontAwesome",
+  "author": "Spec Viewer Team",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/example/spec-viewer"
+  },
+  "features": {
+    "bulma_css": true,
+    "fontawesome_icons": true,
+    "responsive_design": true,
+    "file_tree": true,
+    "multi_tabs": true,
+    "hot_reload": true,
+    "markdown_rendering": true,
+    "syntax_highlighting": true,
+    "browser_translation": true
+  },
+  "ui_components": {
+    "sidebar": {
+      "width": "25%",
+      "resizable": true,
+      "icons": "fontawesome"
+    },
+    "tabs": {
+      "style": "boxed",
+      "closable": true,
+      "max_width": "200px"
+    },
+    "content": {
+      "padding": "2rem",
+      "max_width": "none",
+      "font_family": "system"
+    }
+  },
+  "theme": {
+    "primary_color": "hsl(204, 86%, 53%)",
+    "background": "hsl(0, 0%, 98%)",
+    "text_color": "hsl(0, 0%, 29%)",
+    "border_color": "hsl(0, 0%, 86%)"
+  }
+}

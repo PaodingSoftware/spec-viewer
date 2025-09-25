@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spec Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-brand">
+                <span class="header-title">Spec Viewer</span>
+            </div>
+            <div class="header-actions">
+                <button id="theme-toggle" class="btn btn-sm" title="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="refresh-btn" class="btn btn-sm">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+                <button id="close-all-tabs" class="btn btn-sm">
+                    <i class="fas fa-times-circle"></i>
+                    Close All
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">
+                    <i class="fas fa-folder-open"></i>
+                    Files
+                </h3>
+            </div>
+
+            <div class="sidebar-search">
+                <div class="search-input-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input
+                        type="text"
+                        class="search-input"
+                        placeholder="Go to file..."
+                        id="search-files"
+                    >
+                </div>
+            </div>
+
+            <div class="file-tree" id="fileTree">
+                <div class="loading-container">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Loading files...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resize Handle -->
+        <div class="resize-handle" id="resize-handle"></div>
+
+        <!-- Main Content -->
+        <div class="main-panel">
+            <!-- Tab Bar -->
+            <div class="tab-bar" id="tab-bar">
+                <div class="tab-container">
+                    <div class="tab-list" id="tab-list"></div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area" id="content-area">
+                <!-- Welcome Screen -->
+                <div class="welcome-screen" id="welcome-screen">
+                    <div class="welcome-content">
+                        <div class="welcome-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h1 class="welcome-title">Welcome to Spec Viewer</h1>
+                        <p class="welcome-subtitle">
+                            Choose a file from the file explorer to get started viewing your documentation.
+                        </p>
+
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-window-restore"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>Multi-tab Interface</h3>
+                                    <p>Open and switch between multiple files with ease</p>
+                                </div>
+                            </div>
+
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fab fa-markdown"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>Markdown Support</h3>
+                                    <p>Beautiful rendering with syntax highlighting</p>
+                                </div>
+                            </div>
+
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>Live Reload</h3>
+                                    <p>Real-time updates when files change</p>
+                                </div>
+                            </div>
+
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-filter"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>Smart Filtering</h3>
+                                    <p>Whitelist-based file serving with .specinclude</p>
+                                </div>
+                            </div>
+
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-language"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>Translation Ready</h3>
+                                    <p>Optimized for browser translation plugins</p>
+                                </div>
+                            </div>
+
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <h3>Syntax Highlighting</h3>
+                                    <p>Code blocks with beautiful syntax highlighting</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="/assets/app.js"></script>
+</body>
+</html>
