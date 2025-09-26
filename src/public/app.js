@@ -1,18 +1,18 @@
 class SpecViewer {
     constructor() {
-        // Core state
+        // Initialize core state
         this.socket = io();
         this.tabs = new Map();
         this.activeTabId = null;
         this.fileTree = null;
 
-        // UI state
+        // Initialize UI state
         this.currentTheme = localStorage.getItem('theme') || 'light';
         this.viewMode = 'preview';
         this.outlineVisible = false;
         this.currentOutline = [];
 
-        // Resize state
+        // Initialize resize state
         this.isResizing = false;
         this.isOutlineResizing = false;
 
@@ -33,6 +33,7 @@ class SpecViewer {
         this.init();
     }
 
+    // ===== INITIALIZATION =====
     init() {
         this.setupTheme();
         this.setupEventListeners();
@@ -42,7 +43,6 @@ class SpecViewer {
         this.updateUI();
     }
 
-    // Event Listeners Setup
     setupEventListeners() {
         const events = [
             ['theme-toggle', 'click', () => this.toggleTheme()],
@@ -90,7 +90,6 @@ class SpecViewer {
 
             const handleMouseMove = (e) => {
                 if (!this[resizeProperty]) return;
-
                 const deltaX = isOutline ? startX - e.clientX : e.clientX - startX;
                 const newWidth = Math.max(200, Math.min(500, startWidth + deltaX));
                 panel.style.width = `${newWidth}px`;
@@ -109,7 +108,7 @@ class SpecViewer {
         });
     }
 
-    // Theme Management
+    // ===== THEME MANAGEMENT =====
     setupTheme() {
         document.documentElement.setAttribute('data-theme', this.currentTheme);
         this.updateThemeIcon();
@@ -126,18 +125,21 @@ class SpecViewer {
 
     updateThemeIcon() {
         const toggle = document.getElementById('theme-toggle');
+        if (!toggle) return;
+
         const icon = toggle.querySelector('i');
         const theme = this.THEMES[this.currentTheme];
-
-        icon.className = theme.icon;
-        toggle.title = theme.title;
+        if (icon && theme) {
+            icon.className = theme.icon;
+            toggle.title = theme.title;
+        }
     }
 
     updateHighlightTheme() {
         const existingTheme = document.querySelector('link[href*="highlight.js"]');
         const theme = this.THEMES[this.currentTheme];
 
-        if (existingTheme) {
+        if (existingTheme && theme) {
             existingTheme.addEventListener('load', () => this.rehighlightCode(), { once: true });
             existingTheme.href = theme.highlightCss;
         } else {
@@ -145,13 +147,13 @@ class SpecViewer {
         }
     }
 
-    // File Tree Management
+    // ===== FILE TREE MANAGEMENT =====
     async loadFileTree() {
         const container = document.getElementById('fileTree');
+        if (!container) return;
 
         try {
             container.innerHTML = this.createLoadingHTML();
-
             const response = await fetch('/api/tree');
             if (!response.ok) throw new Error('Failed to load file tree');
 
@@ -216,39 +218,74 @@ class SpecViewer {
         if (item.type === 'directory') return 'fas fa-folder';
 
         const iconMap = {
-            'md': 'fab fa-markdown',
-            'json': 'fas fa-file-code',
-            'js': 'fab fa-js-square',
-            'ts': 'fab fa-js-square',
-            'css': 'fab fa-css3-alt',
-            'html': 'fab fa-html5',
-            'py': 'fab fa-python',
-            'java': 'fab fa-java',
-            'php': 'fab fa-php',
-            'xml': 'fas fa-file-code',
-            'yml': 'fas fa-file-code',
-            'yaml': 'fas fa-file-code',
-            'txt': 'fas fa-file-alt',
-            'pdf': 'fas fa-file-pdf',
-            'png': 'fas fa-file-image',
-            'jpg': 'fas fa-file-image',
-            'jpeg': 'fas fa-file-image',
-            'gif': 'fas fa-file-image',
+            'md': 'fab fa-markdown', 'json': 'fas fa-file-code', 'js': 'fab fa-js-square',
+            'ts': 'fab fa-js-square', 'css': 'fab fa-css3-alt', 'html': 'fab fa-html5',
+            'py': 'fab fa-python', 'java': 'fab fa-java', 'php': 'fab fa-php',
+            'xml': 'fas fa-file-code', 'yml': 'fas fa-file-code', 'yaml': 'fas fa-file-code',
+            'txt': 'fas fa-file-alt', 'pdf': 'fas fa-file-pdf', 'png': 'fas fa-file-image',
+            'jpg': 'fas fa-file-image', 'jpeg': 'fas fa-file-image', 'gif': 'fas fa-file-image',
             'svg': 'fas fa-file-image'
         };
 
-        const ext = item.name.split('.').pop().toLowerCase();
+        const ext = item.name.split('.').pop()?.toLowerCase() || '';
         return iconMap[ext] || 'fas fa-file';
     }
 
-    // Tab Management
+    filterFiles(query) {
+        const items = document.querySelectorAll('.tree-item');
+        const lowerQuery = query.toLowerCase();
+
+        items.forEach(item => {
+            const name = item.dataset.name || '';
+            const path = item.dataset.path?.toLowerCase() || '';
+            const isVisible = !query || name.includes(lowerQuery) || path.includes(lowerQuery);
+            item.classList.toggle('hidden', !isVisible);
+        });
+
+        if (query) {
+            // Expand all directories when searching
+            document.querySelectorAll('.tree-children').forEach(children => {
+                children.classList.remove('collapsed');
+            });
+            document.querySelectorAll('.tree-item.directory').forEach(dir => {
+                dir.classList.add('expanded');
+                const icon = dir.querySelector('i');
+                if (icon) icon.className = 'fas fa-folder-open';
+            });
+        }
+    }
+
+    selectTreeItem(element) {
+        document.querySelectorAll('.tree-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        element.classList.add('selected');
+    }
+
+    toggleDirectory(element) {
+        const isExpanded = element.classList.contains('expanded');
+        const childrenContainer = element.nextElementSibling;
+        const icon = element.querySelector('i');
+
+        if (childrenContainer?.classList.contains('tree-children')) {
+            element.classList.toggle('expanded', !isExpanded);
+            childrenContainer.classList.toggle('collapsed', isExpanded);
+            if (icon) {
+                icon.className = isExpanded ? 'fas fa-folder' : 'fas fa-folder-open';
+            }
+        }
+    }
+
+    // ===== TAB MANAGEMENT =====
     async openFile(filePath) {
+        // Check if tab already exists
         let tabId = this.findTabByPath(filePath);
         if (tabId) {
             this.switchTab(tabId);
             return;
         }
 
+        // Create new tab
         tabId = this.generateTabId();
 
         try {
@@ -277,33 +314,27 @@ class SpecViewer {
                 <i class="fas fa-times"></i>
             </button>
         `;
-
-        document.getElementById('tab-list').appendChild(tab);
+        document.getElementById('tab-list')?.appendChild(tab);
 
         // Create content element
         const content = document.createElement('div');
         content.className = 'tab-content';
         content.dataset.tabId = tabId;
         this.renderFileContent(content, fileData);
-
-        document.getElementById('content-area').appendChild(content);
+        document.getElementById('content-area')?.appendChild(content);
 
         // Store tab data
         this.tabs.set(tabId, {
-            id: tabId,
-            path: filePath,
-            type: fileData.type,
-            element: tab,
-            content: content,
-            rawContent: fileData.content,
-            htmlContent: fileData.html || null
+            id: tabId, path: filePath, type: fileData.type,
+            element: tab, content: content,
+            rawContent: fileData.content, htmlContent: fileData.html || null
         });
 
         this.hideWelcomeScreen();
     }
 
     switchTab(tabId) {
-        // Update UI state
+        // Clear active state from all tabs
         document.querySelectorAll('.tab, .tab-content').forEach(el => {
             el.classList.remove('active');
         });
@@ -350,7 +381,7 @@ class SpecViewer {
         });
     }
 
-    // View Mode Management
+    // ===== VIEW MODE MANAGEMENT =====
     toggleViewMode() {
         this.viewMode = this.viewMode === 'preview' ? 'source' : 'preview';
         this.refreshActiveTabContent();
@@ -397,7 +428,7 @@ class SpecViewer {
         }
     }
 
-    // Outline Management
+    // ===== OUTLINE MANAGEMENT =====
     toggleOutline() {
         this.outlineVisible = !this.outlineVisible;
         this.updateOutlinePanel();
@@ -409,12 +440,12 @@ class SpecViewer {
         const handle = document.getElementById('outline-resize-handle');
 
         if (this.outlineVisible) {
-            panel.style.display = 'flex';
-            handle.style.display = 'block';
+            if (panel) panel.style.display = 'flex';
+            if (handle) handle.style.display = 'block';
             this.generateOutline();
         } else {
-            panel.style.display = 'none';
-            handle.style.display = 'none';
+            if (panel) panel.style.display = 'none';
+            if (handle) handle.style.display = 'none';
         }
     }
 
@@ -438,9 +469,31 @@ class SpecViewer {
         const outline = [];
         const lines = content.split('\n');
         let headingId = 0;
+        let inCodeBlock = false;
+        let inIndentedCodeBlock = false;
 
         lines.forEach((line, i) => {
-            const match = line.trim().match(/^(#{1,6})\s+(.+)$/);
+            const trimmedLine = line.trim();
+
+            // Check for fenced code blocks
+            if (trimmedLine.startsWith('```')) {
+                inCodeBlock = !inCodeBlock;
+                return;
+            }
+
+            // Check for indented code blocks
+            if (line.match(/^(\s{4,}|\t)/)) {
+                inIndentedCodeBlock = true;
+            } else if (trimmedLine === '' && inIndentedCodeBlock) {
+                return; // Empty line in indented code block
+            } else {
+                inIndentedCodeBlock = false;
+            }
+
+            // Skip heading detection if inside code blocks
+            if (inCodeBlock || inIndentedCodeBlock) return;
+
+            const match = trimmedLine.match(/^(#{1,6})\s+(.+)$/);
             if (match) {
                 outline.push({
                     level: match[1].length,
@@ -456,6 +509,7 @@ class SpecViewer {
 
     renderOutline() {
         const container = document.getElementById('outline-content');
+        if (!container) return;
 
         if (this.currentOutline.length === 0) {
             this.showOutlinePlaceholder();
@@ -469,11 +523,10 @@ class SpecViewer {
             element.className = `outline-item level-${item.level}`;
             element.dataset.id = item.id;
             element.dataset.lineNumber = item.lineNumber;
-
             element.innerHTML = `<div class="outline-item-content">${this.escapeHtml(item.text)}</div>`;
 
             element.addEventListener('click', () => {
-                this.scrollToHeading(item.text);
+                this.scrollToHeading(item);
                 this.setActiveOutlineItem(element);
             });
 
@@ -481,21 +534,91 @@ class SpecViewer {
         });
     }
 
-    scrollToHeading(headingText) {
-        if (!this.activeTabId || this.viewMode === 'source') return;
+    scrollToHeading(headingItem) {
+        if (!this.activeTabId) return;
 
         const tab = this.tabs.get(this.activeTabId);
         if (!tab || tab.type !== 'markdown') return;
 
+        // For source mode, scroll to line number
+        if (this.viewMode === 'source') {
+            this.scrollToLineInSource(headingItem.lineNumber);
+            return;
+        }
+
+        // For preview mode, try multiple matching strategies
         const headings = tab.content.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        const target = Array.from(headings).find(h => h.textContent.trim() === headingText);
+        let target = null;
+
+        // Strategy 1: Exact text match
+        target = Array.from(headings).find(h => h.textContent.trim() === headingItem.text);
+
+        // Strategy 2: Match by level and position (for translated content)
+        if (!target) {
+            const headingsOfSameLevel = Array.from(headings).filter(h =>
+                h.tagName.toLowerCase() === `h${headingItem.level}`
+            );
+
+            const sameStyleHeadings = this.currentOutline.filter(item => item.level === headingItem.level);
+            const indexInSameLevel = sameStyleHeadings.indexOf(headingItem);
+
+            if (indexInSameLevel >= 0 && indexInSameLevel < headingsOfSameLevel.length) {
+                target = headingsOfSameLevel[indexInSameLevel];
+            }
+        }
+
+        // Strategy 3: Fallback to outline index
+        if (!target) {
+            const outlineIndex = this.currentOutline.indexOf(headingItem);
+            if (outlineIndex >= 0 && outlineIndex < headings.length) {
+                target = headings[outlineIndex];
+            }
+        }
 
         if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
 
-    // UI Update Methods
+    scrollToLineInSource(lineNumber) {
+        const tab = this.tabs.get(this.activeTabId);
+        if (!tab) return;
+
+        const sourceContent = tab.content.querySelector('.source-view code');
+        if (!sourceContent) return;
+
+        const lines = tab.rawContent.split('\n');
+        if (lineNumber <= lines.length) {
+            const lineHeight = 20;
+            const scrollPosition = Math.max(0, (lineNumber - 5) * lineHeight);
+            tab.content.scrollTop = scrollPosition;
+        }
+    }
+
+    setActiveOutlineItem(activeItem) {
+        document.querySelectorAll('.outline-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        activeItem.classList.add('active');
+    }
+
+    showOutlinePlaceholder() {
+        const container = document.getElementById('outline-content');
+        if (container) {
+            container.innerHTML = `
+                <div class="outline-placeholder">
+                    <i class="fas fa-info-circle"></i>
+                    <span>No outline available</span>
+                </div>
+            `;
+        }
+    }
+
+    updateOutlineIfVisible() {
+        if (this.outlineVisible) this.generateOutline();
+    }
+
+    // ===== UI UPDATES =====
     updateUI() {
         this.updateViewToggleButton();
         this.updateOutlineButton();
@@ -508,13 +631,17 @@ class SpecViewer {
 
     updateOutlineButton() {
         const button = document.getElementById('outline-toggle');
-        const icon = button.querySelector('i');
+        const icon = button?.querySelector('i');
 
         this.setButtonState(button, this.outlineVisible, 'Hide outline panel', 'Show outline panel');
-        icon.className = this.outlineVisible ? 'fas fa-list-alt' : 'fas fa-list';
+        if (icon) {
+            icon.className = this.outlineVisible ? 'fas fa-list-alt' : 'fas fa-list';
+        }
     }
 
     setButtonState(button, isActive, activeTitle, inactiveTitle) {
+        if (!button) return;
+
         button.title = isActive ? activeTitle : inactiveTitle;
         if (isActive) {
             button.style.backgroundColor = 'var(--color-accent-emphasis)';
@@ -525,15 +652,19 @@ class SpecViewer {
         }
     }
 
-    // Event Handlers
+    // ===== EVENT HANDLERS =====
     handleTabClick(e) {
         if (e.target.classList.contains('tab-close') || e.target.closest('.tab-close')) {
             e.stopPropagation();
-            const tabId = e.target.closest('.tab').dataset.tabId;
-            this.closeTab(tabId);
+            const tabElement = e.target.closest('.tab');
+            if (tabElement) {
+                this.closeTab(tabElement.dataset.tabId);
+            }
         } else if (e.target.closest('.tab')) {
-            const tabId = e.target.closest('.tab').dataset.tabId;
-            this.switchTab(tabId);
+            const tabElement = e.target.closest('.tab');
+            if (tabElement) {
+                this.switchTab(tabElement.dataset.tabId);
+            }
         }
     }
 
@@ -576,68 +707,37 @@ class SpecViewer {
         }
     }
 
-    // Utility Methods
-    updateOutlineIfVisible() {
-        if (this.outlineVisible) this.generateOutline();
-    }
-
-    filterFiles(query) {
-        const items = document.querySelectorAll('.tree-item');
-        const lowerQuery = query.toLowerCase();
-
-        items.forEach(item => {
-            const name = item.dataset.name;
-            const path = item.dataset.path?.toLowerCase() || '';
-            const isVisible = !query || name.includes(lowerQuery) || path.includes(lowerQuery);
-
-            item.classList.toggle('hidden', !isVisible);
-        });
-
-        if (query) {
-            document.querySelectorAll('.tree-children').forEach(children => {
-                children.classList.remove('collapsed');
-            });
-            document.querySelectorAll('.tree-item.directory').forEach(dir => {
-                dir.classList.add('expanded');
-                const icon = dir.querySelector('i');
-                if (icon) icon.className = 'fas fa-folder-open';
-            });
+    // ===== UTILITY METHODS =====
+    findTabByPath(filePath) {
+        for (const [tabId, tab] of this.tabs) {
+            if (tab.path === filePath) return tabId;
         }
+        return null;
     }
 
-    selectTreeItem(element) {
-        document.querySelectorAll('.tree-item').forEach(item => {
-            item.classList.remove('selected');
+    generateTabId() {
+        return 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    rehighlightCode() {
+        this.rehighlightCodeInElement(document);
+    }
+
+    rehighlightCodeInElement(element) {
+        element.querySelectorAll('pre code').forEach(block => {
+            block.removeAttribute('data-highlighted');
+            block.className = block.className.replace(/hljs[^\s]*/g, '').trim();
+            hljs.highlightElement(block);
         });
-        element.classList.add('selected');
-    }
-
-    toggleDirectory(element) {
-        const isExpanded = element.classList.contains('expanded');
-        const childrenContainer = element.nextElementSibling;
-        const icon = element.querySelector('i');
-
-        if (childrenContainer?.classList.contains('tree-children')) {
-            element.classList.toggle('expanded', !isExpanded);
-            childrenContainer.classList.toggle('collapsed', isExpanded);
-            icon.className = isExpanded ? 'fas fa-folder' : 'fas fa-folder-open';
-        }
-    }
-
-    setActiveOutlineItem(activeItem) {
-        document.querySelectorAll('.outline-item').forEach(item => {
-            item.classList.remove('active');
-        });
-        activeItem.classList.add('active');
-    }
-
-    showOutlinePlaceholder() {
-        document.getElementById('outline-content').innerHTML = `
-            <div class="outline-placeholder">
-                <i class="fas fa-info-circle"></i>
-                <span>No outline available</span>
-            </div>
-        `;
     }
 
     hideWelcomeScreen() {
@@ -659,42 +759,13 @@ class SpecViewer {
             ${message}
         `;
 
-        document.getElementById('content-area').appendChild(errorDiv);
-
-        errorDiv.querySelector('.delete').addEventListener('click', () => errorDiv.remove());
-        setTimeout(() => errorDiv.remove(), 5000);
-    }
-
-    rehighlightCode() {
-        this.rehighlightCodeInElement(document);
-    }
-
-    rehighlightCodeInElement(element) {
-        element.querySelectorAll('pre code').forEach(block => {
-            block.removeAttribute('data-highlighted');
-            block.className = block.className.replace(/hljs[^\s]*/g, '').trim();
-            hljs.highlightElement(block);
-        });
-    }
-
-    escapeHtml(unsafe) {
-        return unsafe
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    findTabByPath(filePath) {
-        for (const [tabId, tab] of this.tabs) {
-            if (tab.path === filePath) return tabId;
+        const contentArea = document.getElementById('content-area');
+        if (contentArea) {
+            contentArea.appendChild(errorDiv);
         }
-        return null;
-    }
 
-    generateTabId() {
-        return 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        errorDiv.querySelector('.delete')?.addEventListener('click', () => errorDiv.remove());
+        setTimeout(() => errorDiv.remove(), 5000);
     }
 
     createLoadingHTML() {
@@ -716,4 +787,5 @@ class SpecViewer {
     }
 }
 
+// Initialize the application
 document.addEventListener('DOMContentLoaded', () => new SpecViewer());
