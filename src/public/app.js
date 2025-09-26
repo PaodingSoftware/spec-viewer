@@ -6,6 +6,7 @@ class SpecViewer {
         this.fileTree = null;
         this.isResizing = false;
         this.currentTheme = localStorage.getItem('theme') || 'light';
+        this.viewMode = 'preview'; // 'preview' or 'source'
 
         // Theme constants
         this.THEMES = {
@@ -28,6 +29,7 @@ class SpecViewer {
         this.setupSocketListeners();
         this.setupResizeHandle();
         this.loadFileTree();
+        this.updateViewToggleButton();
     }
 
     initializeEventListeners() {
@@ -41,6 +43,10 @@ class SpecViewer {
 
         document.getElementById('close-all-tabs').addEventListener('click', () => {
             this.closeAllTabs();
+        });
+
+        document.getElementById('view-toggle').addEventListener('click', () => {
+            this.toggleViewMode();
         });
 
         document.getElementById('tab-list').addEventListener('click', (e) => {
@@ -338,10 +344,13 @@ class SpecViewer {
         document.getElementById('content-area').appendChild(content);
 
         this.tabs.set(tabId, {
+            id: tabId,
             path: filePath,
             type: fileData.type,
             element: tab,
-            content: content
+            content: content,
+            rawContent: fileData.content,
+            htmlContent: fileData.html || null
         });
 
         this.hideWelcomeScreen();
@@ -437,9 +446,13 @@ class SpecViewer {
                 const tab = this.tabs.get(tabId);
 
                 tab.content.className = 'tab-content';
+                tab.rawContent = fileData.content;
+                tab.htmlContent = fileData.html || null;
+                tab.type = fileData.type;
+
                 this.renderFileContent(tab.content, fileData);
 
-                this.tabs.set(tabId, { ...tab, type: fileData.type });
+                this.tabs.set(tabId, tab);
 
                 if (this.activeTabId === tabId) {
                     tab.content.classList.add('active');
@@ -478,8 +491,13 @@ class SpecViewer {
 
     renderFileContent(contentElement, fileData) {
         if (fileData.type === 'markdown') {
-            contentElement.className += ' markdown-content';
-            contentElement.innerHTML = fileData.html;
+            if (this.viewMode === 'source') {
+                contentElement.className = 'tab-content source-content';
+                contentElement.innerHTML = `<pre class="source-view"><code class="language-markdown">${this.escapeHtml(fileData.content)}</code></pre>`;
+            } else {
+                contentElement.className = 'tab-content markdown-content';
+                contentElement.innerHTML = fileData.html;
+            }
             setTimeout(() => {
                 this.rehighlightCodeInElement(contentElement);
             }, 0);
@@ -547,6 +565,60 @@ class SpecViewer {
             // Reapply syntax highlighting
             hljs.highlightElement(block);
         });
+    }
+
+    toggleViewMode() {
+        if (this.viewMode === 'preview') {
+            this.viewMode = 'source';
+        } else {
+            this.viewMode = 'preview';
+        }
+
+        this.updateViewToggleButton();
+        this.refreshActiveTabContent();
+    }
+
+    updateViewToggleButton() {
+        const viewToggle = document.getElementById('view-toggle');
+
+        if (this.viewMode === 'preview') {
+            viewToggle.innerHTML = '<i class="fas fa-code"></i> Source';
+            viewToggle.title = 'Switch to source view';
+        } else {
+            viewToggle.innerHTML = '<i class="fas fa-eye"></i> Preview';
+            viewToggle.title = 'Switch to preview view';
+        }
+    }
+
+    refreshActiveTabContent() {
+        // Refresh all markdown tabs, not just the current tab
+        this.tabs.forEach((tab) => {
+            if (tab.type === 'markdown') {
+                this.renderTabContent(tab);
+            }
+        });
+    }
+
+    renderTabContent(tab) {
+        if (tab.type === 'markdown') {
+            if (this.viewMode === 'source') {
+                tab.content.className = 'tab-content source-content';
+                tab.content.innerHTML = `<pre class="source-view"><code class="language-markdown">${this.escapeHtml(tab.rawContent)}</code></pre>`;
+                setTimeout(() => {
+                    this.rehighlightCodeInElement(tab.content);
+                }, 0);
+            } else {
+                tab.content.className = 'tab-content markdown-content';
+                tab.content.innerHTML = tab.htmlContent;
+                setTimeout(() => {
+                    this.rehighlightCodeInElement(tab.content);
+                }, 0);
+            }
+
+            if (this.activeTabId === tab.id) {
+                tab.content.classList.add('active');
+            }
+        }
     }
 }
 
