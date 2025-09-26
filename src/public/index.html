@@ -23,6 +23,10 @@
                     <i class="fas fa-code"></i>
                     Source
                 </button>
+                <button id="outline-toggle" class="btn btn-sm" title="Toggle outline panel">
+                    <i class="fas fa-list"></i>
+                    Outline
+                </button>
                 <button id="refresh-btn" class="btn btn-sm">
                     <i class="fas fa-sync-alt"></i>
                     Refresh
@@ -78,8 +82,10 @@
                 </div>
             </div>
 
-            <!-- Content Area -->
-            <div class="content-area" id="content-area">
+            <!-- Content Area with Outline -->
+            <div class="content-wrapper">
+                <!-- Content Area -->
+                <div class="content-area" id="content-area">
                 <!-- Welcome Screen -->
                 <div class="welcome-screen" id="welcome-screen">
                     <div class="welcome-content">
@@ -151,6 +157,26 @@
                                     <p>Code blocks with beautiful syntax highlighting</p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Outline Resize Handle -->
+                <div class="outline-resize-handle" id="outline-resize-handle" style="display: none;"></div>
+
+                <!-- Outline Panel -->
+                <div class="outline-panel" id="outline-panel" style="display: none;">
+                    <div class="outline-header">
+                        <h3 class="outline-title">
+                            <i class="fas fa-list"></i>
+                            Outline
+                        </h3>
+                    </div>
+                    <div class="outline-content" id="outline-content">
+                        <div class="outline-placeholder">
+                            <i class="fas fa-info-circle"></i>
+                            <span>No outline available</span>
                         </div>
                     </div>
                 </div>

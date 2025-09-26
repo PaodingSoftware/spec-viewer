@@ -1,121 +1,103 @@
 class SpecViewer {
     constructor() {
+        // Core state
         this.socket = io();
         this.tabs = new Map();
         this.activeTabId = null;
         this.fileTree = null;
-        this.isResizing = false;
-        this.currentTheme = localStorage.getItem('theme') || 'light';
-        this.viewMode = 'preview'; // 'preview' or 'source'
 
-        // Theme constants
+        // UI state
+        this.currentTheme = localStorage.getItem('theme') || 'light';
+        this.viewMode = 'preview';
+        this.outlineVisible = false;
+        this.currentOutline = [];
+
+        // Resize state
+        this.isResizing = false;
+        this.isOutlineResizing = false;
+
+        // Theme configuration
         this.THEMES = {
-            LIGHT: {
-                name: 'light',
+            light: {
                 icon: 'fas fa-moon',
                 title: 'Toggle dark mode',
                 highlightCss: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css'
             },
-            DARK: {
-                name: 'dark',
+            dark: {
                 icon: 'fas fa-sun',
                 title: 'Toggle light mode',
                 highlightCss: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css'
             }
         };
 
-        this.initializeTheme();
-        this.initializeEventListeners();
-        this.setupSocketListeners();
-        this.setupResizeHandle();
-        this.loadFileTree();
-        this.updateViewToggleButton();
+        this.init();
     }
 
-    initializeEventListeners() {
-        document.getElementById('theme-toggle').addEventListener('click', () => {
-            this.toggleTheme();
-        });
+    init() {
+        this.setupTheme();
+        this.setupEventListeners();
+        this.setupSocketListeners();
+        this.setupResizeHandlers();
+        this.loadFileTree();
+        this.updateUI();
+    }
 
-        document.getElementById('refresh-btn').addEventListener('click', () => {
-            this.loadFileTree();
-        });
+    // Event Listeners Setup
+    setupEventListeners() {
+        const events = [
+            ['theme-toggle', 'click', () => this.toggleTheme()],
+            ['refresh-btn', 'click', () => this.loadFileTree()],
+            ['close-all-tabs', 'click', () => this.closeAllTabs()],
+            ['view-toggle', 'click', () => this.toggleViewMode()],
+            ['outline-toggle', 'click', () => this.toggleOutline()],
+            ['tab-list', 'click', (e) => this.handleTabClick(e)],
+            ['search-files', 'input', (e) => this.filterFiles(e.target.value)],
+            ['search-files', 'keydown', (e) => this.handleSearchKeydown(e)]
+        ];
 
-        document.getElementById('close-all-tabs').addEventListener('click', () => {
-            this.closeAllTabs();
-        });
-
-        document.getElementById('view-toggle').addEventListener('click', () => {
-            this.toggleViewMode();
-        });
-
-        document.getElementById('tab-list').addEventListener('click', (e) => {
-            if (e.target.classList.contains('tab-close') || e.target.closest('.tab-close')) {
-                e.stopPropagation();
-                const tabId = e.target.closest('.tab').dataset.tabId;
-                this.closeTab(tabId);
-            } else if (e.target.closest('.tab')) {
-                const tabId = e.target.closest('.tab').dataset.tabId;
-                this.switchTab(tabId);
-            }
-        });
-
-        const searchInput = document.getElementById('search-files');
-        searchInput.addEventListener('input', (e) => {
-            this.filterFiles(e.target.value);
-        });
-
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                e.target.value = '';
-                this.filterFiles('');
-            }
+        events.forEach(([id, event, handler]) => {
+            const element = document.getElementById(id);
+            if (element) element.addEventListener(event, handler);
         });
     }
 
     setupSocketListeners() {
-        this.socket.on('file-changed', (data) => {
-            console.log('File changed:', data.path);
-            this.handleFileChange(data.path);
-        });
-
-        this.socket.on('tree-changed', () => {
-            console.log('Directory tree changed');
-            this.loadFileTree();
-        });
-
-        this.socket.on('connect', () => {
-            console.log('Connected to server');
-        });
-
-        this.socket.on('disconnect', () => {
-            console.log('Disconnected from server');
-        });
+        this.socket.on('file-changed', (data) => this.handleFileChange(data.path));
+        this.socket.on('tree-changed', () => this.loadFileTree());
+        this.socket.on('connect', () => console.log('Connected to server'));
+        this.socket.on('disconnect', () => console.log('Disconnected from server'));
     }
 
-    setupResizeHandle() {
-        const resizeHandle = document.getElementById('resize-handle');
-        const sidebar = document.getElementById('sidebar');
+    setupResizeHandlers() {
+        this.setupResizeHandle('resize-handle', 'sidebar', false);
+        this.setupResizeHandle('outline-resize-handle', 'outline-panel', true);
+    }
 
-        resizeHandle.addEventListener('mousedown', (e) => {
-            this.isResizing = true;
+    setupResizeHandle(handleId, panelId, isOutline) {
+        const handle = document.getElementById(handleId);
+        const panel = document.getElementById(panelId);
+        if (!handle || !panel) return;
+
+        handle.addEventListener('mousedown', (e) => {
+            const resizeProperty = isOutline ? 'isOutlineResizing' : 'isResizing';
+            this[resizeProperty] = true;
+
             document.body.style.cursor = 'ew-resize';
             document.body.style.userSelect = 'none';
 
             const startX = e.clientX;
-            const startWidth = sidebar.offsetWidth;
+            const startWidth = panel.offsetWidth;
 
             const handleMouseMove = (e) => {
-                if (!this.isResizing) return;
+                if (!this[resizeProperty]) return;
 
-                const deltaX = e.clientX - startX;
+                const deltaX = isOutline ? startX - e.clientX : e.clientX - startX;
                 const newWidth = Math.max(200, Math.min(500, startWidth + deltaX));
-
-                sidebar.style.width = `${newWidth}px`;
+                panel.style.width = `${newWidth}px`;
             };
 
             const handleMouseUp = () => {
-                this.isResizing = false;
+                this[resizeProperty] = false;
                 document.body.style.cursor = '';
                 document.body.style.userSelect = '';
                 document.removeEventListener('mousemove', handleMouseMove);
@@ -127,34 +109,58 @@ class SpecViewer {
         });
     }
 
+    // Theme Management
+    setupTheme() {
+        document.documentElement.setAttribute('data-theme', this.currentTheme);
+        this.updateThemeIcon();
+        this.updateHighlightTheme();
+    }
+
+    toggleTheme() {
+        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', this.currentTheme);
+        localStorage.setItem('theme', this.currentTheme);
+        this.updateThemeIcon();
+        this.updateHighlightTheme();
+    }
+
+    updateThemeIcon() {
+        const toggle = document.getElementById('theme-toggle');
+        const icon = toggle.querySelector('i');
+        const theme = this.THEMES[this.currentTheme];
+
+        icon.className = theme.icon;
+        toggle.title = theme.title;
+    }
+
+    updateHighlightTheme() {
+        const existingTheme = document.querySelector('link[href*="highlight.js"]');
+        const theme = this.THEMES[this.currentTheme];
+
+        if (existingTheme) {
+            existingTheme.addEventListener('load', () => this.rehighlightCode(), { once: true });
+            existingTheme.href = theme.highlightCss;
+        } else {
+            this.rehighlightCode();
+        }
+    }
+
+    // File Tree Management
     async loadFileTree() {
-        const treeContainer = document.getElementById('fileTree');
+        const container = document.getElementById('fileTree');
 
         try {
-            treeContainer.innerHTML = `
-                <div class="loading-container">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <span>Loading files...</span>
-                </div>
-            `;
+            container.innerHTML = this.createLoadingHTML();
 
             const response = await fetch('/api/tree');
-            if (!response.ok) {
-                throw new Error('Failed to load file tree');
-            }
+            if (!response.ok) throw new Error('Failed to load file tree');
 
             const tree = await response.json();
             this.fileTree = tree;
-            this.renderFileTree(tree, treeContainer);
-
+            this.renderFileTree(tree, container);
         } catch (error) {
             console.error('Error loading file tree:', error);
-            treeContainer.innerHTML = `
-                <div class="notification error">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Failed to load files
-                </div>
-            `;
+            container.innerHTML = this.createErrorHTML('Failed to load files');
         }
     }
 
@@ -162,8 +168,8 @@ class SpecViewer {
         container.innerHTML = '';
 
         items.forEach(item => {
-            const itemElement = this.createTreeItem(item, level);
-            container.appendChild(itemElement);
+            const element = this.createTreeItem(item, level);
+            container.appendChild(element);
 
             if (item.type === 'directory' && item.children) {
                 const childrenContainer = document.createElement('div');
@@ -177,46 +183,38 @@ class SpecViewer {
     createTreeItem(item, level) {
         const element = document.createElement('div');
         element.className = `tree-item ${item.type}`;
-        if (item.name.endsWith('.md')) {
-            element.classList.add('markdown');
-        }
+        if (item.name.endsWith('.md')) element.classList.add('markdown');
 
         element.style.paddingLeft = `${16 + level * 12}px`;
-        element.dataset.path = item.path;
-        element.dataset.type = item.type;
-        element.dataset.name = item.name.toLowerCase();
-
-        const iconClass = this.getFileIcon(item);
+        Object.assign(element.dataset, {
+            path: item.path,
+            type: item.type,
+            name: item.name.toLowerCase()
+        });
 
         element.innerHTML = `
             <div class="tree-icon">
-                <i class="${iconClass}"></i>
+                <i class="${this.getFileIcon(item)}"></i>
             </div>
             <span class="tree-item-name">${item.name}</span>
         `;
 
-        if (item.type === 'directory') {
-            element.addEventListener('click', (e) => {
-                e.stopPropagation();
+        element.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (item.type === 'directory') {
                 this.toggleDirectory(element);
-            });
-        } else {
-            element.addEventListener('click', (e) => {
-                e.stopPropagation();
+            } else {
                 this.selectTreeItem(element);
                 this.openFile(item.path);
-            });
-        }
+            }
+        });
 
         return element;
     }
 
     getFileIcon(item) {
-        if (item.type === 'directory') {
-            return 'fas fa-folder';
-        }
+        if (item.type === 'directory') return 'fas fa-folder';
 
-        const ext = item.name.split('.').pop().toLowerCase();
         const iconMap = {
             'md': 'fab fa-markdown',
             'json': 'fas fa-file-code',
@@ -239,64 +237,13 @@ class SpecViewer {
             'svg': 'fas fa-file-image'
         };
 
+        const ext = item.name.split('.').pop().toLowerCase();
         return iconMap[ext] || 'fas fa-file';
     }
 
-    selectTreeItem(element) {
-        document.querySelectorAll('.tree-item').forEach(item => {
-            item.classList.remove('selected');
-        });
-        element.classList.add('selected');
-    }
-
-    toggleDirectory(element) {
-        const isExpanded = element.classList.contains('expanded');
-        const childrenContainer = element.nextElementSibling;
-        const icon = element.querySelector('i');
-
-        if (childrenContainer && childrenContainer.classList.contains('tree-children')) {
-            if (isExpanded) {
-                element.classList.remove('expanded');
-                childrenContainer.classList.add('collapsed');
-                icon.className = 'fas fa-folder';
-            } else {
-                element.classList.add('expanded');
-                childrenContainer.classList.remove('collapsed');
-                icon.className = 'fas fa-folder-open';
-            }
-        }
-    }
-
-    filterFiles(query) {
-        const items = document.querySelectorAll('.tree-item');
-        const lowerQuery = query.toLowerCase();
-
-        items.forEach(item => {
-            const name = item.dataset.name;
-            const path = item.dataset.path?.toLowerCase() || '';
-
-            if (!query || name.includes(lowerQuery) || path.includes(lowerQuery)) {
-                item.classList.remove('hidden');
-            } else {
-                item.classList.add('hidden');
-            }
-        });
-
-        if (query) {
-            document.querySelectorAll('.tree-children').forEach(children => {
-                children.classList.remove('collapsed');
-            });
-            document.querySelectorAll('.tree-item.directory').forEach(dir => {
-                dir.classList.add('expanded');
-                const icon = dir.querySelector('i');
-                if (icon) icon.className = 'fas fa-folder-open';
-            });
-        }
-    }
-
+    // Tab Management
     async openFile(filePath) {
         let tabId = this.findTabByPath(filePath);
-
         if (tabId) {
             this.switchTab(tabId);
             return;
@@ -306,14 +253,11 @@ class SpecViewer {
 
         try {
             const response = await fetch(`/api/file/${filePath}`);
-            if (!response.ok) {
-                throw new Error('Failed to load file');
-            }
+            if (!response.ok) throw new Error('Failed to load file');
 
             const fileData = await response.json();
             this.createTab(tabId, filePath, fileData);
             this.switchTab(tabId);
-
         } catch (error) {
             console.error('Error opening file:', error);
             this.showError(`Failed to open file: ${filePath}`);
@@ -323,6 +267,7 @@ class SpecViewer {
     createTab(tabId, filePath, fileData) {
         const fileName = filePath.split(/[/\\]/).pop();
 
+        // Create tab element
         const tab = document.createElement('div');
         tab.className = 'tab';
         tab.dataset.tabId = tabId;
@@ -335,14 +280,15 @@ class SpecViewer {
 
         document.getElementById('tab-list').appendChild(tab);
 
+        // Create content element
         const content = document.createElement('div');
         content.className = 'tab-content';
         content.dataset.tabId = tabId;
-
         this.renderFileContent(content, fileData);
 
         document.getElementById('content-area').appendChild(content);
 
+        // Store tab data
         this.tabs.set(tabId, {
             id: tabId,
             path: filePath,
@@ -357,12 +303,9 @@ class SpecViewer {
     }
 
     switchTab(tabId) {
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.classList.remove('active');
-        });
-
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
+        // Update UI state
+        document.querySelectorAll('.tab, .tab-content').forEach(el => {
+            el.classList.remove('active');
         });
 
         const tab = this.tabs.get(tabId);
@@ -370,29 +313,31 @@ class SpecViewer {
             tab.element.classList.add('active');
             tab.content.classList.add('active');
             this.activeTabId = tabId;
+            this.updateOutlineIfVisible();
         }
     }
 
     closeTab(tabId) {
         const tab = this.tabs.get(tabId);
-        if (tab) {
-            tab.element.remove();
-            tab.content.remove();
-            this.tabs.delete(tabId);
+        if (!tab) return;
 
-            if (this.activeTabId === tabId) {
-                const remainingTabs = Array.from(this.tabs.keys());
-                if (remainingTabs.length > 0) {
-                    this.switchTab(remainingTabs[remainingTabs.length - 1]);
-                } else {
-                    this.showWelcomeScreen();
-                }
+        tab.element.remove();
+        tab.content.remove();
+        this.tabs.delete(tabId);
+
+        if (this.activeTabId === tabId) {
+            const remainingTabs = Array.from(this.tabs.keys());
+            if (remainingTabs.length > 0) {
+                this.switchTab(remainingTabs[remainingTabs.length - 1]);
+            } else {
+                this.showWelcomeScreen();
+                this.activeTabId = null;
             }
         }
     }
 
     closeAllTabs() {
-        this.tabs.forEach((tab) => {
+        this.tabs.forEach(tab => {
             tab.element.remove();
             tab.content.remove();
         });
@@ -400,70 +345,309 @@ class SpecViewer {
         this.tabs.clear();
         this.activeTabId = null;
         this.showWelcomeScreen();
-
         document.querySelectorAll('.tree-item').forEach(item => {
             item.classList.remove('selected');
         });
     }
 
-    hideWelcomeScreen() {
-        const welcomeScreen = document.getElementById('welcome-screen');
-        if (welcomeScreen) {
-            welcomeScreen.style.display = 'none';
-        }
+    // View Mode Management
+    toggleViewMode() {
+        this.viewMode = this.viewMode === 'preview' ? 'source' : 'preview';
+        this.refreshActiveTabContent();
+        this.updateUI();
     }
 
-    showWelcomeScreen() {
-        const welcomeScreen = document.getElementById('welcome-screen');
-        if (welcomeScreen) {
-            welcomeScreen.style.display = 'flex';
-        }
-    }
-
-    findTabByPath(filePath) {
-        for (const [tabId, tab] of this.tabs) {
-            if (tab.path === filePath) {
-                return tabId;
+    refreshActiveTabContent() {
+        this.tabs.forEach(tab => {
+            if (tab.type === 'markdown') {
+                this.renderTabContent(tab);
             }
-        }
-        return null;
+        });
+        this.updateOutlineIfVisible();
     }
 
-    generateTabId() {
-        return 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    renderTabContent(tab) {
+        if (tab.type !== 'markdown') return;
+
+        if (this.viewMode === 'source') {
+            tab.content.className = 'tab-content source-content';
+            tab.content.innerHTML = `<pre class="source-view"><code class="language-markdown">${this.escapeHtml(tab.rawContent)}</code></pre>`;
+        } else {
+            tab.content.className = 'tab-content markdown-content';
+            tab.content.innerHTML = tab.htmlContent;
+        }
+
+        setTimeout(() => this.rehighlightCodeInElement(tab.content), 0);
+
+        if (this.activeTabId === tab.id) {
+            tab.content.classList.add('active');
+        }
+    }
+
+    renderFileContent(contentElement, fileData) {
+        if (fileData.type === 'markdown') {
+            this.renderTabContent({
+                content: contentElement,
+                type: fileData.type,
+                rawContent: fileData.content,
+                htmlContent: fileData.html
+            });
+        } else {
+            contentElement.innerHTML = `<div class="text-content">${this.escapeHtml(fileData.content)}</div>`;
+        }
+    }
+
+    // Outline Management
+    toggleOutline() {
+        this.outlineVisible = !this.outlineVisible;
+        this.updateOutlinePanel();
+        this.updateUI();
+    }
+
+    updateOutlinePanel() {
+        const panel = document.getElementById('outline-panel');
+        const handle = document.getElementById('outline-resize-handle');
+
+        if (this.outlineVisible) {
+            panel.style.display = 'flex';
+            handle.style.display = 'block';
+            this.generateOutline();
+        } else {
+            panel.style.display = 'none';
+            handle.style.display = 'none';
+        }
+    }
+
+    generateOutline() {
+        if (!this.activeTabId) {
+            this.showOutlinePlaceholder();
+            return;
+        }
+
+        const tab = this.tabs.get(this.activeTabId);
+        if (!tab || tab.type !== 'markdown') {
+            this.showOutlinePlaceholder();
+            return;
+        }
+
+        this.currentOutline = this.parseMarkdownOutline(tab.rawContent);
+        this.renderOutline();
+    }
+
+    parseMarkdownOutline(content) {
+        const outline = [];
+        const lines = content.split('\n');
+        let headingId = 0;
+
+        lines.forEach((line, i) => {
+            const match = line.trim().match(/^(#{1,6})\s+(.+)$/);
+            if (match) {
+                outline.push({
+                    level: match[1].length,
+                    text: match[2].trim(),
+                    id: `heading-${++headingId}`,
+                    lineNumber: i + 1
+                });
+            }
+        });
+
+        return outline;
+    }
+
+    renderOutline() {
+        const container = document.getElementById('outline-content');
+
+        if (this.currentOutline.length === 0) {
+            this.showOutlinePlaceholder();
+            return;
+        }
+
+        container.innerHTML = '';
+
+        this.currentOutline.forEach(item => {
+            const element = document.createElement('div');
+            element.className = `outline-item level-${item.level}`;
+            element.dataset.id = item.id;
+            element.dataset.lineNumber = item.lineNumber;
+
+            element.innerHTML = `<div class="outline-item-content">${this.escapeHtml(item.text)}</div>`;
+
+            element.addEventListener('click', () => {
+                this.scrollToHeading(item.text);
+                this.setActiveOutlineItem(element);
+            });
+
+            container.appendChild(element);
+        });
+    }
+
+    scrollToHeading(headingText) {
+        if (!this.activeTabId || this.viewMode === 'source') return;
+
+        const tab = this.tabs.get(this.activeTabId);
+        if (!tab || tab.type !== 'markdown') return;
+
+        const headings = tab.content.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        const target = Array.from(headings).find(h => h.textContent.trim() === headingText);
+
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // UI Update Methods
+    updateUI() {
+        this.updateViewToggleButton();
+        this.updateOutlineButton();
+    }
+
+    updateViewToggleButton() {
+        const button = document.getElementById('view-toggle');
+        this.setButtonState(button, this.viewMode === 'source', 'Switch to preview view', 'Switch to source view');
+    }
+
+    updateOutlineButton() {
+        const button = document.getElementById('outline-toggle');
+        const icon = button.querySelector('i');
+
+        this.setButtonState(button, this.outlineVisible, 'Hide outline panel', 'Show outline panel');
+        icon.className = this.outlineVisible ? 'fas fa-list-alt' : 'fas fa-list';
+    }
+
+    setButtonState(button, isActive, activeTitle, inactiveTitle) {
+        button.title = isActive ? activeTitle : inactiveTitle;
+        if (isActive) {
+            button.style.backgroundColor = 'var(--color-accent-emphasis)';
+            button.style.color = '#ffffff';
+        } else {
+            button.style.backgroundColor = '';
+            button.style.color = '';
+        }
+    }
+
+    // Event Handlers
+    handleTabClick(e) {
+        if (e.target.classList.contains('tab-close') || e.target.closest('.tab-close')) {
+            e.stopPropagation();
+            const tabId = e.target.closest('.tab').dataset.tabId;
+            this.closeTab(tabId);
+        } else if (e.target.closest('.tab')) {
+            const tabId = e.target.closest('.tab').dataset.tabId;
+            this.switchTab(tabId);
+        }
+    }
+
+    handleSearchKeydown(e) {
+        if (e.key === 'Escape') {
+            e.target.value = '';
+            this.filterFiles('');
+        }
     }
 
     async handleFileChange(filePath) {
         const tabId = this.findTabByPath(filePath);
-        if (tabId) {
-            try {
-                const response = await fetch(`/api/file/${filePath}`);
-                if (!response.ok) {
-                    throw new Error('Failed to reload file');
-                }
+        if (!tabId) return;
 
-                const fileData = await response.json();
-                const tab = this.tabs.get(tabId);
+        try {
+            const response = await fetch(`/api/file/${filePath}`);
+            if (!response.ok) throw new Error('Failed to reload file');
 
-                tab.content.className = 'tab-content';
-                tab.rawContent = fileData.content;
-                tab.htmlContent = fileData.html || null;
-                tab.type = fileData.type;
+            const fileData = await response.json();
+            const tab = this.tabs.get(tabId);
 
-                this.renderFileContent(tab.content, fileData);
+            // Update tab data
+            Object.assign(tab, {
+                rawContent: fileData.content,
+                htmlContent: fileData.html || null,
+                type: fileData.type
+            });
 
-                this.tabs.set(tabId, tab);
+            // Re-render content
+            this.renderFileContent(tab.content, fileData);
 
-                if (this.activeTabId === tabId) {
-                    tab.content.classList.add('active');
-                }
-
-                console.log(`Reloaded content for: ${filePath}`);
-
-            } catch (error) {
-                console.error('Error reloading file:', error);
+            if (this.activeTabId === tabId) {
+                tab.content.classList.add('active');
+                this.updateOutlineIfVisible();
             }
+
+            console.log(`Reloaded content for: ${filePath}`);
+        } catch (error) {
+            console.error('Error reloading file:', error);
         }
+    }
+
+    // Utility Methods
+    updateOutlineIfVisible() {
+        if (this.outlineVisible) this.generateOutline();
+    }
+
+    filterFiles(query) {
+        const items = document.querySelectorAll('.tree-item');
+        const lowerQuery = query.toLowerCase();
+
+        items.forEach(item => {
+            const name = item.dataset.name;
+            const path = item.dataset.path?.toLowerCase() || '';
+            const isVisible = !query || name.includes(lowerQuery) || path.includes(lowerQuery);
+
+            item.classList.toggle('hidden', !isVisible);
+        });
+
+        if (query) {
+            document.querySelectorAll('.tree-children').forEach(children => {
+                children.classList.remove('collapsed');
+            });
+            document.querySelectorAll('.tree-item.directory').forEach(dir => {
+                dir.classList.add('expanded');
+                const icon = dir.querySelector('i');
+                if (icon) icon.className = 'fas fa-folder-open';
+            });
+        }
+    }
+
+    selectTreeItem(element) {
+        document.querySelectorAll('.tree-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        element.classList.add('selected');
+    }
+
+    toggleDirectory(element) {
+        const isExpanded = element.classList.contains('expanded');
+        const childrenContainer = element.nextElementSibling;
+        const icon = element.querySelector('i');
+
+        if (childrenContainer?.classList.contains('tree-children')) {
+            element.classList.toggle('expanded', !isExpanded);
+            childrenContainer.classList.toggle('collapsed', isExpanded);
+            icon.className = isExpanded ? 'fas fa-folder' : 'fas fa-folder-open';
+        }
+    }
+
+    setActiveOutlineItem(activeItem) {
+        document.querySelectorAll('.outline-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        activeItem.classList.add('active');
+    }
+
+    showOutlinePlaceholder() {
+        document.getElementById('outline-content').innerHTML = `
+            <div class="outline-placeholder">
+                <i class="fas fa-info-circle"></i>
+                <span>No outline available</span>
+            </div>
+        `;
+    }
+
+    hideWelcomeScreen() {
+        const screen = document.getElementById('welcome-screen');
+        if (screen) screen.style.display = 'none';
+    }
+
+    showWelcomeScreen() {
+        const screen = document.getElementById('welcome-screen');
+        if (screen) screen.style.display = 'flex';
     }
 
     showError(message) {
@@ -475,35 +659,22 @@ class SpecViewer {
             ${message}
         `;
 
-        const contentArea = document.getElementById('content-area');
-        contentArea.appendChild(errorDiv);
+        document.getElementById('content-area').appendChild(errorDiv);
 
-        errorDiv.querySelector('.delete').addEventListener('click', () => {
-            errorDiv.remove();
-        });
-
-        setTimeout(() => {
-            if (errorDiv.parentNode) {
-                errorDiv.remove();
-            }
-        }, 5000);
+        errorDiv.querySelector('.delete').addEventListener('click', () => errorDiv.remove());
+        setTimeout(() => errorDiv.remove(), 5000);
     }
 
-    renderFileContent(contentElement, fileData) {
-        if (fileData.type === 'markdown') {
-            if (this.viewMode === 'source') {
-                contentElement.className = 'tab-content source-content';
-                contentElement.innerHTML = `<pre class="source-view"><code class="language-markdown">${this.escapeHtml(fileData.content)}</code></pre>`;
-            } else {
-                contentElement.className = 'tab-content markdown-content';
-                contentElement.innerHTML = fileData.html;
-            }
-            setTimeout(() => {
-                this.rehighlightCodeInElement(contentElement);
-            }, 0);
-        } else {
-            contentElement.innerHTML = `<div class="text-content">${this.escapeHtml(fileData.content)}</div>`;
-        }
+    rehighlightCode() {
+        this.rehighlightCodeInElement(document);
+    }
+
+    rehighlightCodeInElement(element) {
+        element.querySelectorAll('pre code').forEach(block => {
+            block.removeAttribute('data-highlighted');
+            block.className = block.className.replace(/hljs[^\s]*/g, '').trim();
+            hljs.highlightElement(block);
+        });
     }
 
     escapeHtml(unsafe) {
@@ -515,113 +686,34 @@ class SpecViewer {
             .replace(/'/g, "&#039;");
     }
 
-    initializeTheme() {
-        document.documentElement.setAttribute('data-theme', this.currentTheme);
-        this.updateThemeIcon();
-        this.updateHighlightTheme();
-    }
-
-    toggleTheme() {
-        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', this.currentTheme);
-        localStorage.setItem('theme', this.currentTheme);
-        this.updateThemeIcon();
-        this.updateHighlightTheme();
-    }
-
-    updateThemeIcon() {
-        const themeToggle = document.getElementById('theme-toggle');
-        const icon = themeToggle.querySelector('i');
-        const currentThemeConfig = this.currentTheme === 'dark' ? this.THEMES.DARK : this.THEMES.LIGHT;
-
-        icon.className = currentThemeConfig.icon;
-        themeToggle.title = currentThemeConfig.title;
-    }
-
-    updateHighlightTheme() {
-        const existingTheme = document.querySelector('link[href*="highlight.js"]');
-        const currentThemeConfig = this.currentTheme === 'dark' ? this.THEMES.DARK : this.THEMES.LIGHT;
-
-        if (existingTheme) {
-            existingTheme.addEventListener('load', () => {
-                this.rehighlightCode();
-            }, { once: true });
-            existingTheme.href = currentThemeConfig.highlightCss;
-        } else {
-            this.rehighlightCode();
+    findTabByPath(filePath) {
+        for (const [tabId, tab] of this.tabs) {
+            if (tab.path === filePath) return tabId;
         }
+        return null;
     }
 
-    rehighlightCode() {
-        this.rehighlightCodeInElement(document);
+    generateTabId() {
+        return 'tab_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
-    rehighlightCodeInElement(element) {
-        element.querySelectorAll('pre code').forEach((block) => {
-            // Clear existing highlight.js classes and styles
-            block.removeAttribute('data-highlighted');
-            block.className = block.className.replace(/hljs[^\s]*/g, '').trim();
-
-            // Reapply syntax highlighting
-            hljs.highlightElement(block);
-        });
+    createLoadingHTML() {
+        return `
+            <div class="loading-container">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Loading files...</span>
+            </div>
+        `;
     }
 
-    toggleViewMode() {
-        if (this.viewMode === 'preview') {
-            this.viewMode = 'source';
-        } else {
-            this.viewMode = 'preview';
-        }
-
-        this.updateViewToggleButton();
-        this.refreshActiveTabContent();
-    }
-
-    updateViewToggleButton() {
-        const viewToggle = document.getElementById('view-toggle');
-
-        if (this.viewMode === 'preview') {
-            viewToggle.innerHTML = '<i class="fas fa-code"></i> Source';
-            viewToggle.title = 'Switch to source view';
-        } else {
-            viewToggle.innerHTML = '<i class="fas fa-eye"></i> Preview';
-            viewToggle.title = 'Switch to preview view';
-        }
-    }
-
-    refreshActiveTabContent() {
-        // Refresh all markdown tabs, not just the current tab
-        this.tabs.forEach((tab) => {
-            if (tab.type === 'markdown') {
-                this.renderTabContent(tab);
-            }
-        });
-    }
-
-    renderTabContent(tab) {
-        if (tab.type === 'markdown') {
-            if (this.viewMode === 'source') {
-                tab.content.className = 'tab-content source-content';
-                tab.content.innerHTML = `<pre class="source-view"><code class="language-markdown">${this.escapeHtml(tab.rawContent)}</code></pre>`;
-                setTimeout(() => {
-                    this.rehighlightCodeInElement(tab.content);
-                }, 0);
-            } else {
-                tab.content.className = 'tab-content markdown-content';
-                tab.content.innerHTML = tab.htmlContent;
-                setTimeout(() => {
-                    this.rehighlightCodeInElement(tab.content);
-                }, 0);
-            }
-
-            if (this.activeTabId === tab.id) {
-                tab.content.classList.add('active');
-            }
-        }
+    createErrorHTML(message) {
+        return `
+            <div class="notification error">
+                <i class="fas fa-exclamation-triangle"></i>
+                ${message}
+            </div>
+        `;
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    new SpecViewer();
-});
+document.addEventListener('DOMContentLoaded', () => new SpecViewer());

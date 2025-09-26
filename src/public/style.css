@@ -1,7 +1,9 @@
-/* GitHub-style Spec Viewer */
+/* ================================================
+   CSS Variables & Color Schemes
+   ================================================ */
 
-/* CSS Variables - GitHub Color Palette */
 :root {
+  /* Light Theme Colors */
   --color-canvas-default: #ffffff;
   --color-canvas-subtle: #f6f8fa;
   --color-canvas-inset: #f6f8fa;
@@ -24,8 +26,8 @@
   --color-primer-shadow-inset: inset 0 1px 0 rgba(208, 215, 222, 0.2);
 }
 
-/* Dark Theme Variables */
 [data-theme="dark"] {
+  /* Dark Theme Colors */
   --color-canvas-default: #0d1117;
   --color-canvas-subtle: #161b22;
   --color-canvas-inset: #161b22;
@@ -48,7 +50,10 @@
   --color-primer-shadow-inset: inset 0 1px 0 rgba(48, 54, 61, 0.2);
 }
 
-/* Base Styles */
+/* ================================================
+   Base Styles
+   ================================================ */
+
 * {
   box-sizing: border-box;
 }
@@ -64,6 +69,10 @@ html, body {
   color: var(--color-fg-default);
   background-color: var(--color-canvas-default);
 }
+
+/* ================================================
+   Layout Components
+   ================================================ */
 
 /* Header */
 .header {
@@ -106,6 +115,38 @@ html, body {
   gap: 8px;
 }
 
+/* Main Layout */
+.app-container {
+  display: flex;
+  height: calc(100vh - 48px);
+  background-color: var(--color-canvas-default);
+}
+
+.main-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--color-canvas-default);
+}
+
+.content-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.content-area {
+  flex: 1;
+  overflow: hidden;
+  background-color: var(--color-canvas-default);
+  position: relative;
+}
+
+/* ================================================
+   Interactive Elements
+   ================================================ */
+
 /* Buttons */
 .btn {
   position: relative;
@@ -141,18 +182,33 @@ html, body {
   border-color: var(--color-btn-hover-border);
 }
 
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent-emphasis);
+  outline-offset: -2px;
+}
+
 .btn i {
   margin-right: 4px;
 }
 
-/* Main Container */
-.app-container {
-  display: flex;
-  height: calc(100vh - 48px);
-  background-color: var(--color-canvas-default);
+/* Resize Handles */
+.resize-handle,
+.outline-resize-handle {
+  width: 4px;
+  background-color: var(--color-border-default);
+  cursor: ew-resize;
+  transition: background-color 0.12s ease-in-out;
 }
 
-/* Sidebar */
+.resize-handle:hover,
+.outline-resize-handle:hover {
+  background-color: var(--color-accent-emphasis);
+}
+
+/* ================================================
+   Sidebar Components
+   ================================================ */
+
 .sidebar {
   width: 280px;
   min-width: 200px;
@@ -183,7 +239,7 @@ html, body {
   color: var(--color-accent-fg);
 }
 
-/* Search */
+/* Search Input */
 .sidebar-search {
   padding: 12px 16px;
   border-bottom: 1px solid var(--color-border-default);
@@ -226,28 +282,16 @@ html, body {
   pointer-events: none;
 }
 
-/* File Tree */
+/* ================================================
+   File Tree Components
+   ================================================ */
+
 .file-tree {
   flex: 1;
   overflow-y: auto;
   padding: 8px 0;
 }
 
-.loading-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 32px;
-  color: var(--color-fg-muted);
-  font-size: 12px;
-}
-
-.loading-container i {
-  color: var(--color-accent-fg);
-}
-
-/* Tree Items */
 .tree-item {
   display: flex;
   align-items: center;
@@ -267,6 +311,15 @@ html, body {
 .tree-item.selected {
   background-color: var(--color-accent-emphasis);
   color: #ffffff;
+}
+
+.tree-item:focus-visible {
+  outline: 2px solid var(--color-accent-emphasis);
+  outline-offset: -2px;
+}
+
+.tree-item.hidden {
+  display: none !important;
 }
 
 .tree-item .tree-icon {
@@ -300,32 +353,10 @@ html, body {
   display: none;
 }
 
-.tree-item.hidden {
-  display: none !important;
-}
+/* ================================================
+   Tab System
+   ================================================ */
 
-/* Resize Handle */
-.resize-handle {
-  width: 4px;
-  background-color: var(--color-border-default);
-  cursor: ew-resize;
-  transition: background-color 0.12s ease-in-out;
-}
-
-.resize-handle:hover {
-  background-color: var(--color-accent-emphasis);
-}
-
-/* Main Panel */
-.main-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background-color: var(--color-canvas-default);
-}
-
-/* Tab Bar */
 .tab-bar {
   background-color: var(--color-canvas-subtle);
   border-bottom: 1px solid var(--color-border-default);
@@ -376,6 +407,11 @@ html, body {
   margin-bottom: -1px;
 }
 
+.tab:focus-visible {
+  outline: 2px solid var(--color-accent-emphasis);
+  outline-offset: -2px;
+}
+
 .tab-title {
   flex: 1;
   overflow: hidden;
@@ -403,14 +439,7 @@ html, body {
   color: var(--color-fg-default);
 }
 
-/* Content Area */
-.content-area {
-  flex: 1;
-  overflow: hidden;
-  background-color: var(--color-canvas-default);
-  position: relative;
-}
-
+/* Tab Content */
 .tab-content {
   display: none;
   height: 100%;
@@ -421,6 +450,10 @@ html, body {
 .tab-content.active {
   display: block;
 }
+
+/* ================================================
+   Content Display
+   ================================================ */
 
 /* Welcome Screen */
 .welcome-screen {
@@ -501,7 +534,25 @@ html, body {
   line-height: 1.4;
 }
 
-/* Markdown Content */
+/* Loading & Error States */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  color: var(--color-fg-muted);
+  font-size: 12px;
+}
+
+.loading-container i {
+  color: var(--color-accent-fg);
+}
+
+/* ================================================
+   Markdown Content Styles
+   ================================================ */
+
 .markdown-content {
   line-height: 1.6;
   color: var(--color-fg-default);
@@ -599,6 +650,7 @@ html, body {
   background-color: var(--color-canvas-subtle);
 }
 
+/* Code Styles */
 .markdown-content pre {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   padding: 16px;
@@ -637,6 +689,36 @@ html, body {
   white-space: pre;
 }
 
+/* Source View */
+.source-content {
+  background-color: var(--color-canvas-default);
+}
+
+.source-view {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 16px;
+  background-color: var(--color-canvas-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.source-view code {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
 /* Text Content */
 .text-content {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
@@ -649,7 +731,123 @@ html, body {
   overflow-wrap: break-word;
 }
 
-/* Notifications */
+/* ================================================
+   Outline Panel
+   ================================================ */
+
+.outline-panel {
+  width: 280px;
+  min-width: 200px;
+  max-width: 400px;
+  background-color: var(--color-canvas-subtle);
+  border-left: 1px solid var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.outline-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.outline-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-fg-default);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.outline-title i {
+  color: var(--color-accent-fg);
+}
+
+.outline-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.outline-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  color: var(--color-fg-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.outline-placeholder i {
+  color: var(--color-accent-fg);
+}
+
+.outline-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-fg-default);
+  user-select: none;
+  transition: background-color 0.12s ease-in-out;
+  border-left: 2px solid transparent;
+}
+
+.outline-item:hover {
+  background-color: var(--color-neutral-muted);
+}
+
+.outline-item.active {
+  background-color: var(--color-accent-emphasis);
+  color: #ffffff;
+  border-left-color: #ffffff;
+}
+
+.outline-item-content {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outline-item.level-1 {
+  padding-left: 16px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.outline-item.level-2 {
+  padding-left: 28px;
+  font-weight: 500;
+}
+
+.outline-item.level-3 {
+  padding-left: 40px;
+}
+
+.outline-item.level-4 {
+  padding-left: 52px;
+}
+
+.outline-item.level-5 {
+  padding-left: 64px;
+}
+
+.outline-item.level-6 {
+  padding-left: 76px;
+  color: var(--color-fg-muted);
+}
+
+/* ================================================
+   Notifications & Alerts
+   ================================================ */
+
 .notification {
   padding: 12px 16px;
   margin: 16px;
@@ -661,6 +859,12 @@ html, body {
   color: var(--color-danger-fg);
   background-color: #fff1f3;
   border-color: #ffb3ba;
+}
+
+[data-theme="dark"] .notification.error {
+  color: var(--color-danger-fg);
+  background-color: #2d1617;
+  border-color: #664e54;
 }
 
 .notification .delete {
@@ -676,7 +880,10 @@ html, body {
   opacity: 1;
 }
 
-/* Scrollbars */
+/* ================================================
+   Scrollbars
+   ================================================ */
+
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
@@ -697,7 +904,30 @@ html, body {
   background-color: var(--color-fg-muted);
 }
 
-/* Responsive Design */
+/* ================================================
+   Animations
+   ================================================ */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.fa-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ================================================
+   Responsive Design
+   ================================================ */
+
+@media (max-width: 1024px) {
+  .outline-panel,
+  .outline-resize-handle {
+    display: none !important;
+  }
+}
+
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
@@ -728,66 +958,4 @@ html, body {
   .header-title {
     font-size: 14px;
   }
-}
-
-/* Animations */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.fa-spin {
-  animation: spin 1s linear infinite;
-}
-
-/* Focus States */
-.btn:focus-visible {
-  outline: 2px solid var(--color-accent-emphasis);
-  outline-offset: -2px;
-}
-
-.tree-item:focus-visible {
-  outline: 2px solid var(--color-accent-emphasis);
-  outline-offset: -2px;
-}
-
-.tab:focus-visible {
-  outline: 2px solid var(--color-accent-emphasis);
-  outline-offset: -2px;
-}
-
-/* Source Content */
-.source-content {
-  background-color: var(--color-canvas-default);
-}
-
-.source-view {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0;
-  padding: 16px;
-  background-color: var(--color-canvas-subtle);
-  border: 1px solid var(--color-border-default);
-  border-radius: 6px;
-  overflow: auto;
-  white-space: pre-wrap;
-}
-
-.source-view code {
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  color: inherit;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-}
-
-[data-theme="dark"] .notification.error {
-  color: var(--color-danger-fg);
-  background-color: #2d1617;
-  border-color: #664e54;
 }
