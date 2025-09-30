@@ -1,54 +1,24 @@
 const vscode = acquireVsCodeApi();
 
-let currentViewMode = '{{viewMode}}';
+// Read initial data from script tag
+const dataElement = document.getElementById('viewer-data');
+let currentViewMode = dataElement?.dataset.viewMode || 'preview';
+let rawContent = '';
+try {
+    rawContent = JSON.parse(dataElement?.textContent || '""');
+} catch (e) {
+    console.error('Failed to parse raw content:', e);
+}
+
 let outlineVisible = false;
 let currentOutline = [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    detectAndSetTheme();
     setupEventListeners();
     hljs.highlightAll();
     generateOutline();
 });
-
-function detectAndSetTheme() {
-    // Detect VSCode theme by checking computed styles
-    const bgColor = getComputedStyle(document.body).getPropertyValue('--vscode-editor-background');
-    const themeLink = document.getElementById('highlight-theme');
-
-    if (!themeLink) return;
-
-    // Calculate brightness from background color
-    const isDark = isColorDark(bgColor);
-
-    if (isDark) {
-        themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css';
-    } else {
-        themeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css';
-    }
-
-    // Re-highlight after theme loads
-    themeLink.addEventListener('load', () => {
-        hljs.highlightAll();
-    }, { once: true });
-}
-
-function isColorDark(color) {
-    if (!color) return false;
-
-    // Parse RGB values
-    const rgb = color.match(/\d+/g);
-    if (!rgb || rgb.length < 3) return false;
-
-    // Calculate relative luminance
-    const r = parseInt(rgb[0]);
-    const g = parseInt(rgb[1]);
-    const b = parseInt(rgb[2]);
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-    return luminance < 0.5;
-}
 
 function setupEventListeners() {
     document.getElementById('view-toggle')?.addEventListener('click', toggleViewMode);
@@ -58,22 +28,13 @@ function setupEventListeners() {
 
 function toggleViewMode() {
     currentViewMode = currentViewMode === 'preview' ? 'source' : 'preview';
+    const isSource = currentViewMode === 'source';
 
-    const previewEl = document.getElementById('markdown-preview');
-    const sourceEl = document.getElementById('markdown-source');
-    const toggleText = document.getElementById('view-toggle-text');
+    document.getElementById('markdown-preview').style.display = isSource ? 'none' : 'block';
+    document.getElementById('markdown-source').style.display = isSource ? 'block' : 'none';
+    document.getElementById('view-toggle-text').textContent = isSource ? 'Preview' : 'Source';
 
-    if (currentViewMode === 'source') {
-        previewEl.style.display = 'none';
-        sourceEl.style.display = 'block';
-        toggleText.textContent = 'Preview';
-        hljs.highlightAll();
-    } else {
-        previewEl.style.display = 'block';
-        sourceEl.style.display = 'none';
-        toggleText.textContent = 'Source';
-    }
-
+    if (isSource) hljs.highlightAll();
     generateOutline();
 }
 
@@ -83,50 +44,38 @@ function toggleOutline() {
     const handle = document.getElementById('outline-resize-handle');
     const button = document.getElementById('outline-toggle');
 
-    if (outlineVisible) {
-        panel.style.display = 'flex';
-        handle.style.display = 'block';
-        button.style.backgroundColor = 'var(--vscode-button-background)';
-        button.style.color = 'var(--vscode-button-foreground)';
-        generateOutline();
-    } else {
-        panel.style.display = 'none';
-        handle.style.display = 'none';
-        button.style.backgroundColor = '';
-        button.style.color = '';
-    }
+    panel.style.display = outlineVisible ? 'flex' : 'none';
+    handle.style.display = outlineVisible ? 'block' : 'none';
+    button.style.backgroundColor = outlineVisible ? 'var(--vscode-button-background)' : '';
+    button.style.color = outlineVisible ? 'var(--vscode-button-foreground)' : '';
+
+    if (outlineVisible) generateOutline();
 }
 
 function generateOutline() {
-    const rawContent = {{rawContentJson}};
     currentOutline = parseMarkdownOutline(rawContent);
     renderOutline();
 }
 
 function parseMarkdownOutline(content) {
     const outline = [];
-    const lines = content.split('\n');
     let headingId = 0;
     let inCodeBlock = false;
 
-    lines.forEach((line, i) => {
-        const trimmedLine = line.trim();
-
-        if (trimmedLine.startsWith('```')) {
+    content.split('\n').forEach((line, i) => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('```')) {
             inCodeBlock = !inCodeBlock;
-            return;
-        }
-
-        if (inCodeBlock) return;
-
-        const match = trimmedLine.match(/^(#{1,6})\s+(.+)$/);
-        if (match) {
-            outline.push({
-                level: match[1].length,
-                text: match[2].trim(),
-                id: `heading-${++headingId}`,
-                lineNumber: i + 1
-            });
+        } else if (!inCodeBlock) {
+            const match = trimmed.match(/^(#{1,6})\s+(.+)$/);
+            if (match) {
+                outline.push({
+                    level: match[1].length,
+                    text: match[2].trim(),
+                    id: `heading-${++headingId}`,
+                    lineNumber: i + 1
+                });
+            }
         }
     });
 
@@ -165,22 +114,17 @@ function renderOutline() {
 }
 
 function scrollToHeading(headingItem) {
-    if (currentViewMode === 'preview') {
-        const contentArea = document.getElementById('markdown-preview');
-        const headings = contentArea.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    if (currentViewMode !== 'preview') return;
 
-        let target = Array.from(headings).find(h => h.textContent.trim() === headingItem.text);
+    const contentArea = document.getElementById('markdown-preview');
+    const target = Array.from(contentArea.querySelectorAll('h1, h2, h3, h4, h5, h6'))
+        .find(h => h.textContent.trim() === headingItem.text);
 
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    }
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function setActiveOutlineItem(activeItem) {
-    document.querySelectorAll('.outline-item').forEach(item => {
-        item.classList.remove('active');
-    });
+    document.querySelectorAll('.outline-item').forEach(item => item.classList.remove('active'));
     activeItem.classList.add('active');
 }
 

@@ -7,8 +7,8 @@ body {
     padding: 0;
     height: 100vh;
     overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
-    font-size: 15px;
+    font-family: var(--vscode-font-family);
+    font-size: 13px;
     line-height: 1.5;
     color: var(--vscode-foreground);
     background-color: var(--vscode-editor-background);
@@ -32,15 +32,7 @@ body {
     padding: 0 12px;
 }
 
-.header-brand {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 400;
-}
-
 .header-title {
-    font-size: 13px;
     opacity: 0.8;
 }
 
@@ -66,7 +58,6 @@ body {
 
 .btn-sm {
     padding: 3px 6px;
-    font-size: 11px;
 }
 
 .btn:hover {
@@ -92,7 +83,7 @@ body {
 }
 
 .tab-content {
-    height: 100%;
+    min-height: 100%;
 }
 
 /* Markdown Styles */
@@ -143,13 +134,17 @@ body {
     opacity: 0.8;
 }
 
-.markdown-content p {
+.markdown-content p,
+.markdown-content ul,
+.markdown-content ol,
+.markdown-content pre,
+.markdown-content table,
+.markdown-content blockquote {
     margin: 16px 0;
 }
 
 .markdown-content ul,
 .markdown-content ol {
-    margin: 16px 0;
     padding-left: 2em;
 }
 
@@ -158,18 +153,15 @@ body {
     overflow: auto;
     background-color: var(--vscode-textCodeBlock-background);
     border-radius: 6px;
-    margin: 16px 0;
 }
 
 .markdown-content code {
     font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 13px;
 }
 
 .markdown-content table {
     border-collapse: collapse;
     width: 100%;
-    margin: 16px 0;
 }
 
 .markdown-content table th,
@@ -179,7 +171,6 @@ body {
 }
 
 .markdown-content blockquote {
-    margin: 16px 0;
     padding: 0 1em;
     border-left: 4px solid var(--vscode-panel-border);
     color: var(--vscode-descriptionForeground);
@@ -197,8 +188,6 @@ body {
 
 .source-view {
     font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 13px;
-    line-height: 1.5;
     margin: 0;
     padding: 16px;
     background-color: var(--vscode-textCodeBlock-background);
@@ -245,7 +234,6 @@ body {
     justify-content: center;
     gap: 8px;
     padding: 32px;
-    font-size: 13px;
     text-align: center;
     opacity: 0.7;
 }
@@ -255,7 +243,6 @@ body {
     align-items: flex-start;
     padding: 6px 16px;
     cursor: pointer;
-    font-size: 13px;
     line-height: 1.4;
     user-select: none;
     transition: background-color 0.1s;
@@ -278,33 +265,12 @@ body {
     white-space: nowrap;
 }
 
-.outline-item.level-1 {
-    padding-left: 16px;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.outline-item.level-2 {
-    padding-left: 28px;
-    font-weight: 500;
-}
-
-.outline-item.level-3 {
-    padding-left: 40px;
-}
-
-.outline-item.level-4 {
-    padding-left: 52px;
-}
-
-.outline-item.level-5 {
-    padding-left: 64px;
-}
-
-.outline-item.level-6 {
-    padding-left: 76px;
-    opacity: 0.8;
-}
+.outline-item.level-1 { padding-left: 16px; font-weight: 600; font-size: 14px; }
+.outline-item.level-2 { padding-left: 28px; font-weight: 500; }
+.outline-item.level-3 { padding-left: 40px; }
+.outline-item.level-4 { padding-left: 52px; }
+.outline-item.level-5 { padding-left: 64px; }
+.outline-item.level-6 { padding-left: 76px; opacity: 0.8; }
 
 /* Resize Handle */
 .outline-resize-handle {

@@ -1,0 +1,132 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--vscode-font-family);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-sideBar-background);
+    overflow: hidden;
+}
+
+.sidebar-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.search-container {
+    padding: 12px 20px;
+}
+
+#search-input {
+    width: 100%;
+    padding: 5px 8px;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 2px;
+    outline: none;
+}
+
+#search-input:focus {
+    border-color: var(--vscode-focusBorder);
+}
+
+.file-tree {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 20px 8px;
+}
+
+.loading {
+    padding: 20px;
+    text-align: center;
+    color: var(--vscode-descriptionForeground);
+}
+
+.tree-item {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    height: 26px;
+    cursor: pointer;
+    user-select: none;
+    line-height: 26px;
+}
+
+.tree-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.tree-item.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+.tree-item-indent {
+    display: inline-block;
+}
+
+.tree-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+}
+
+.tree-item-indent,
+.tree-item-icon {
+    flex-shrink: 0;
+}
+
+.tree-item-chevron {
+    margin-right: 4px;
+    transition: transform 0.15s;
+    color: var(--vscode-icon-foreground);
+}
+
+.tree-item-chevron.expanded {
+    transform: rotate(90deg);
+}
+
+.tree-item-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Icon colors */
+.fa-folder, .fa-folder-open { color: #8094ae; }
+.fa-markdown { color: #42a5f5; }
+.fa-js { color: #f7df1e; }
+.fa-react { color: #61dafb; }
+.fa-python { color: #3776ab; }
+.fa-java { color: #007396; }
+.fa-php { color: #777bb4; }
+.fa-swift { color: #fa7343; }
+.fa-html5 { color: #e34f26; }
+.fa-css3-alt { color: #1572b6; }
+.fa-sass { color: #cc6699; }
+.fa-vuejs { color: #42b883; }
+.fa-git-alt { color: #f05032; }
+.fa-docker { color: #2496ed; }
+.fa-npm { color: #cb3837; }
+.fa-file-pdf { color: #d32f2f; }
+.fa-file-word { color: #2b579a; }
+.fa-file-excel { color: #217346; }
+.fa-file-powerpoint { color: #d24726; }
+.fa-file-image { color: #9c27b0; }
+.fa-file-audio { color: #ff6f00; }
+.fa-file-video { color: #e91e63; }
+.fa-file-zipper { color: #795548; }
+.fa-file-code { color: #607d8b; }
+.fa-gear { color: #9e9e9e; }
+.fa-braces { color: #fbc02d; }

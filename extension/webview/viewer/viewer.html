@@ -3,22 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="{{cspContent}}">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="" id="highlight-theme">
-
-    <style>
-        {{styles}}
-    </style>
+    <link rel="stylesheet" href="{{fontAwesomeUri}}">
+    <link rel="stylesheet" href="{{styleUri}}">
+    <link rel="stylesheet" href="{{highlightThemeUri}}">
 </head>
-<body class="vscode-body">
+<body>
     <!-- Header -->
     <header class="header">
         <div class="header-container">
-            <div class="header-brand">
-                <span class="header-title">Spec Viewer</span>
-            </div>
+            <span class="header-title">Spec Viewer</span>
             <div class="header-actions">
                 <button id="view-toggle" class="btn btn-sm" title="Toggle preview/source view">
                     <i class="fas fa-code"></i>
@@ -34,20 +27,17 @@
 
     <!-- Content Area -->
     <div class="content-wrapper">
-        <!-- Main Content -->
         <div class="content-area" id="content-area">
-            <div id="markdown-preview" class="tab-content active markdown-content" style="display: {{previewDisplay}};">
+            <div id="markdown-preview" class="markdown-content" style="display: {{previewDisplay}};">
                 {{htmlContent}}
             </div>
-            <div id="markdown-source" class="tab-content source-content" style="display: {{sourceDisplay}};">
+            <div id="markdown-source" class="source-content" style="display: {{sourceDisplay}};">
                 <pre class="source-view"><code class="language-markdown">{{rawContent}}</code></pre>
             </div>
         </div>
 
-        <!-- Outline Resize Handle -->
         <div class="outline-resize-handle" id="outline-resize-handle" style="display: none;"></div>
 
-        <!-- Outline Panel -->
         <div class="outline-panel" id="outline-panel" style="display: none;">
             <div class="outline-header">
                 <h3 class="outline-title">
@@ -57,16 +47,16 @@
             </div>
             <div class="outline-content" id="outline-content">
                 <div class="outline-placeholder">
-                    <i class="fas fa-info-circle"></i>
-                    <span>No outline available</span>
+                    <i class="fas fa-info-circle"></i> No outline available
                 </div>
             </div>
         </div>
     </div>
 
-    <script nonce="{{nonce}}" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script nonce="{{nonce}}">
-        {{script}}
+    <script id="viewer-data" type="application/json" data-view-mode="{{viewMode}}">
+{{rawContentJson}}
     </script>
+    <script src="{{highlightJsUri}}"></script>
+    <script src="{{scriptUri}}"></script>
 </body>
 </html>

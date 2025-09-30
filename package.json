@@ -3,7 +3,7 @@
   "displayName": "Spec Viewer",
   "version": "1.0.0",
   "description": "A VSCode extension for viewing spec-kit generated documentation",
-  "main": "extension/extension.js",
+  "main": "extension/src/extension.js",
   "bin": {
     "spec-viewer": "bin/spec-viewer.js"
   },
@@ -28,6 +28,7 @@
         {
           "id": "specViewerExplorer",
           "name": "Files",
+          "type": "webview",
           "icon": "$(files)",
           "contextualTitle": "Spec Files"
         }
@@ -40,22 +41,16 @@
         "category": "Spec Viewer"
       },
       {
-        "command": "spec-viewer.refresh",
-        "title": "Refresh File Tree",
+        "command": "spec-viewer.collapseAll",
+        "title": "Collapse All",
         "category": "Spec Viewer",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "spec-viewer.closeAllTabs",
-        "title": "Close All Tabs",
-        "category": "Spec Viewer",
-        "icon": "$(close-all)"
+        "icon": "$(collapse-all)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "spec-viewer.refresh",
+          "command": "spec-viewer.collapseAll",
           "when": "view == specViewerExplorer",
           "group": "navigation"
         }

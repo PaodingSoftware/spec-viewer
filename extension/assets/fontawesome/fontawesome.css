@@ -1,0 +1,102 @@
+/* Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) */
+
+/* Font Face Definitions */
+@font-face {
+  font-family: "Font Awesome 6 Brands";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("../webfonts/fa-brands-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("../webfonts/fa-regular-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 900;
+  font-display: block;
+  src: url("../webfonts/fa-solid-900.woff2") format("woff2");
+}
+
+/* Base Classes */
+.fa, .fas, .far, .fab {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-rendering: auto;
+}
+
+.fa-solid, .fas {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+}
+
+.fa-regular, .far {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+}
+
+.fa-brands, .fab {
+  font-family: "Font Awesome 6 Brands";
+  font-weight: 400;
+}
+
+/* Icon Definitions - Solid & Regular */
+.fa-folder::before { content: "\f07b"; }
+.fa-folder-open::before { content: "\f07c"; }
+.fa-file::before { content: "\f15b"; }
+.fa-file-lines::before { content: "\f15c"; }
+.fa-file-code::before { content: "\f1c9"; }
+.fa-file-pdf::before { content: "\f1c1"; }
+.fa-file-word::before { content: "\f1c2"; }
+.fa-file-excel::before { content: "\f1c3"; }
+.fa-file-powerpoint::before { content: "\f1c4"; }
+.fa-file-image::before { content: "\f1c5"; }
+.fa-file-audio::before { content: "\f1c7"; }
+.fa-file-video::before { content: "\f1c8"; }
+.fa-file-zipper::before { content: "\f1c6"; }
+.fa-file-csv::before { content: "\f6dd"; }
+.fa-file-alt::before { content: "\f15c"; }
+.fa-chevron-right::before { content: "\f054"; }
+.fa-gear::before { content: "\f013"; }
+.fa-braces::before { content: "\f7ea"; }
+.fa-spinner::before { content: "\f110"; }
+.fa-code::before { content: "\f121"; }
+.fa-list::before { content: "\f03a"; }
+.fa-info-circle::before { content: "\f05a"; }
+
+/* Brand Icons */
+.fa-markdown::before { content: "\f60f"; }
+.fa-js::before { content: "\f3b8"; }
+.fa-react::before { content: "\f41b"; }
+.fa-python::before { content: "\f3e2"; }
+.fa-java::before { content: "\f4e4"; }
+.fa-php::before { content: "\f457"; }
+.fa-swift::before { content: "\f8e1"; }
+.fa-html5::before { content: "\f13b"; }
+.fa-css3-alt::before { content: "\f38b"; }
+.fa-sass::before { content: "\f41e"; }
+.fa-vuejs::before { content: "\f41f"; }
+.fa-git-alt::before { content: "\f841"; }
+.fa-docker::before { content: "\f395"; }
+.fa-npm::before { content: "\f3d4"; }
+
+/* Animations */
+.fa-spin {
+  animation: fa-spin 2s infinite linear;
+}
+
+@keyframes fa-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
