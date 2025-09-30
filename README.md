@@ -18,7 +18,7 @@ A Node.js CLI tool for viewing spec-kit generated documentation in a local web b
 git clone <repository>
 cd spec-viewer
 npm install
-npm run install-global
+npm run install-cli
 ```
 
 ## Usage
@@ -55,6 +55,7 @@ Create a `.specinclude` file to specify which files to serve:
 # Documentation directories
 spec/
 docs/
+specify/
 
 # Specific files
 README.md
