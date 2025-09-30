@@ -63,6 +63,15 @@ class SenatusInstaller {
             const sourceSpecifyDir = path.join(this.senatusPath, '.specify');
             await this.copyDirectory(sourceSpecifyDir, specifyDir);
 
+            // Copy .specinclude file
+            const sourceSpecinclude = path.join(this.extensionPath, '.specinclude');
+            const targetSpecinclude = path.join(workspaceFolder, '.specinclude');
+            try {
+                await fs.copyFile(sourceSpecinclude, targetSpecinclude);
+            } catch (error) {
+                console.warn('Failed to copy .specinclude:', error.message);
+            }
+
             vscode.window.showInformationMessage('Senatus Framework installed successfully!');
             return true;
         } catch (error) {
