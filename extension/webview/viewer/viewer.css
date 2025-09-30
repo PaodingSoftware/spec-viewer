@@ -151,8 +151,13 @@ body {
 .markdown-content pre {
     padding: 16px;
     overflow: auto;
-    background-color: var(--vscode-textCodeBlock-background);
+    background-color: var(--vscode-textCodeBlock-background) !important;
     border-radius: 6px;
+}
+
+.markdown-content pre code {
+    background-color: transparent !important;
+    color: var(--vscode-editor-foreground) !important;
 }
 
 .markdown-content code {

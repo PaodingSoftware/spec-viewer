@@ -1,4 +1,4 @@
-(function() {
+(function () {
     const vscode = acquireVsCodeApi();
 
     let fileTree = [];
@@ -9,7 +9,6 @@
     const previousState = vscode.getState();
     if (previousState) {
         expandedDirs = new Set(previousState.expandedDirs || []);
-        selectedFile = previousState.selectedFile || null;
     }
 
     // Initialize

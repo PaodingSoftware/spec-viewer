@@ -14,6 +14,12 @@ class FileViewerProvider extends WebviewBase {
         super(context);
         this.workspaceFolder = workspaceFolder;
         this.panels = new Map(); // filePath -> panel
+        this.panelStates = new Map(); // filePath -> { viewMode }
+
+        // Listen for theme changes
+        vscode.window.onDidChangeActiveColorTheme(() => {
+            this.onThemeChanged();
+        }, null, context.subscriptions);
     }
 
 
@@ -45,8 +51,9 @@ class FileViewerProvider extends WebviewBase {
             }
         );
 
-        // Store panel reference
+        // Store panel reference and initial state
         this.panels.set(filePath, panel);
+        this.panelStates.set(filePath, { viewMode: 'preview' });
 
         // Load and render content
         await this.updatePanelContent(panel, filePath);
@@ -54,8 +61,8 @@ class FileViewerProvider extends WebviewBase {
         // Handle messages from webview
         panel.webview.onDidReceiveMessage(
             async message => {
-                if (message.command === 'toggleViewMode') {
-                    await this.updatePanelContent(panel, filePath, message.viewMode);
+                if (message.command === 'viewModeChanged') {
+                    this.panelStates.set(filePath, { viewMode: message.viewMode });
                 }
             },
             null,
@@ -74,6 +81,7 @@ class FileViewerProvider extends WebviewBase {
         // Handle panel disposal
         panel.onDidDispose(() => {
             this.panels.delete(filePath);
+            this.panelStates.delete(filePath);
             watcher.dispose();
         }, null, this.context.subscriptions);
     }
@@ -109,7 +117,8 @@ class FileViewerProvider extends WebviewBase {
      * Generate markdown webview content
      */
     async getMarkdownWebviewContent(panel, rawContent, htmlContent, viewMode = 'preview') {
-        const uris = ResourceUri.getViewerUris(this.context, panel.webview, 'github-dark.min.css');
+        const highlightTheme = this.getHighlightTheme();
+        const uris = ResourceUri.getViewerUris(this.context, panel.webview, highlightTheme);
         const htmlTemplate = await super.loadTemplate('extension/webview/viewer/viewer.html');
 
         return WebviewUtils.renderTemplate(htmlTemplate, {
@@ -146,6 +155,30 @@ class FileViewerProvider extends WebviewBase {
         return WebviewUtils.renderTemplate(template, {
             message: WebviewUtils.escapeHtml(message)
         });
+    }
+
+    /**
+     * Get highlight.js theme based on VSCode theme
+     */
+    getHighlightTheme() {
+        const themeKind = vscode.window.activeColorTheme.kind;
+
+        // ColorThemeKind: Light = 1, Dark = 2, HighContrast = 3, HighContrastLight = 4
+        if (themeKind === vscode.ColorThemeKind.Light || themeKind === vscode.ColorThemeKind.HighContrastLight) {
+            return 'github.min.css';
+        } else {
+            return 'github-dark.min.css';
+        }
+    }
+
+    /**
+     * Handle theme changes by refreshing all open panels
+     */
+    async onThemeChanged() {
+        for (const [filePath, panel] of this.panels.entries()) {
+            const state = this.panelStates.get(filePath) || { viewMode: 'preview' };
+            await this.updatePanelContent(panel, filePath, state.viewMode);
+        }
     }
 
 }

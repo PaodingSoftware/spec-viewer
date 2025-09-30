@@ -36,6 +36,12 @@ function toggleViewMode() {
 
     if (isSource) hljs.highlightAll();
     generateOutline();
+
+    // Notify extension about view mode change
+    vscode.postMessage({
+        command: 'viewModeChanged',
+        viewMode: currentViewMode
+    });
 }
 
 function toggleOutline() {
