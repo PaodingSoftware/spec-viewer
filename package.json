@@ -13,14 +13,60 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "spec-viewer-sidebar",
+          "title": "Spec Viewer",
+          "icon": "$(book)"
+        }
+      ]
+    },
+    "views": {
+      "spec-viewer-sidebar": [
+        {
+          "id": "specViewerExplorer",
+          "name": "Files",
+          "icon": "$(files)",
+          "contextualTitle": "Spec Files"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "spec-viewer.open",
-        "title": "Open Spec Viewer"
+        "command": "spec-viewer.openFile",
+        "title": "Open File",
+        "category": "Spec Viewer"
+      },
+      {
+        "command": "spec-viewer.refresh",
+        "title": "Refresh File Tree",
+        "category": "Spec Viewer",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "spec-viewer.closeAllTabs",
+        "title": "Close All Tabs",
+        "category": "Spec Viewer",
+        "icon": "$(close-all)"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "spec-viewer.refresh",
+          "when": "view == specViewerExplorer",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "spec-viewer.openFile",
+          "when": "false"
+        }
+      ]
+    }
   },
   "scripts": {
     "demo": "node bin/spec-viewer.js demo --port 3003",
