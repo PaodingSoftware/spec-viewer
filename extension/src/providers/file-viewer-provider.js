@@ -76,11 +76,12 @@ class FileViewerProvider extends WebviewBase {
         );
 
         // Watch for file changes
-        const fullPath = path.join(this.workspaceFolder, filePath);
-        const watcher = vscode.workspace.createFileSystemWatcher(fullPath);
-        watcher.onDidChange(async () => {
+        const watchPattern = new vscode.RelativePattern(this.workspaceFolder, filePath);
+        const watcher = vscode.workspace.createFileSystemWatcher(watchPattern);
+        const changeListener = watcher.onDidChange(async () => {
             if (this.panels.has(filePath)) {
-                await this.updatePanelContent(panel, filePath);
+                const state = this.panelStates.get(filePath) || { viewMode: 'preview' };
+                await this.updatePanelContent(panel, filePath, state.viewMode);
             }
         });
 
@@ -88,6 +89,7 @@ class FileViewerProvider extends WebviewBase {
         panel.onDidDispose(() => {
             this.panels.delete(filePath);
             this.panelStates.delete(filePath);
+            changeListener.dispose();
             watcher.dispose();
         }, null, this.context.subscriptions);
     }

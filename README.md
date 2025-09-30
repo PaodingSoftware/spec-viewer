@@ -36,10 +36,10 @@ spec-viewer . --port 8080
 
 ### Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--port` `-p` | Server port | `3000` |
-| `--host` | Server host | `localhost` |
+| Option           | Description  | Default        |
+| ---------------- | ------------ | -------------- |
+| `--port` `-p`    | Server port  | `3000`         |
+| `--host`         | Server host  | `localhost`    |
 | `--include` `-i` | Include file | `.specinclude` |
 
 ## Configuration
