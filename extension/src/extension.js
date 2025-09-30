@@ -1,10 +1,12 @@
 const vscode = require('vscode');
 const { SidebarProvider } = require('./providers/sidebar-provider');
 const { FileViewerProvider } = require('./providers/file-viewer-provider');
+const { DashboardProvider } = require('./providers/dashboard-provider');
 const { SenatusInstaller } = require('./utils/senatus-installer');
 
 let sidebarProvider = null;
 let fileViewerProvider = null;
+let dashboardProvider = null;
 
 /**
  * Refresh file tree
@@ -71,10 +73,19 @@ function activate(context) {
     // Initialize file viewer provider
     fileViewerProvider = new FileViewerProvider(context, workspaceFolder);
 
+    // Initialize dashboard provider
+    dashboardProvider = new DashboardProvider(context, workspaceFolder);
+
     // Register commands
     context.subscriptions.push(
         vscode.commands.registerCommand('spec-viewer.openFile', async (filePath) => {
             await fileViewerProvider.openFile(filePath);
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('spec-viewer.openDashboard', async () => {
+            await dashboardProvider.openDashboard();
         })
     );
 

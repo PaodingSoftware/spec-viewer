@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Senatus Dashboard</title>
+    <link rel="stylesheet" href="{{fontAwesomeUri}}">
+    <link rel="stylesheet" href="{{styleUri}}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1 class="dashboard-title">
+                <i class="fas fa-chart-line"></i>
+                Senatus Dashboard
+            </h1>
+            <button id="refresh-btn" class="btn btn-refresh" title="Refresh Dashboard">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </header>
+
+        <!-- Content -->
+        <div class="dashboard-content" id="dashboard-content">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                Loading dashboard...
+            </div>
+        </div>
+
+        <!-- Empty State (hidden by default) -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <i class="fas fa-folder-open"></i>
+            <h2>No Topics Found</h2>
+            <p>The <code>specify/</code> directory is empty or doesn't exist.</p>
+            <p>Create a new topic using <code>/new-topic</code> command.</p>
+        </div>
+    </div>
+
+    <!-- Data container -->
+    <script id="dashboard-data" type="application/json">
+{{dataJson}}
+    </script>
+
+    <script src="{{scriptUri}}"></script>
+</body>
+</html>

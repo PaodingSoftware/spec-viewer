@@ -75,6 +75,19 @@
 .fa-list::before { content: "\f03a"; }
 .fa-info-circle::before { content: "\f05a"; }
 
+/* Dashboard Icons */
+.fa-chart-line::before { content: "\f201"; }
+.fa-sync-alt::before { content: "\f2f1"; }
+.fa-comments::before { content: "\f086"; }
+.fa-tasks::before { content: "\f0ae"; }
+.fa-check-circle::before { content: "\f058"; }
+.fa-layer-group::before { content: "\f5fd"; }
+.fa-circle::before { content: "\f111"; }
+.fa-plus-circle::before { content: "\f055"; }
+.fa-search::before { content: "\f002"; }
+.fa-clipboard-list::before { content: "\f46d"; }
+.fa-bolt::before { content: "\f0e7"; }
+
 /* Brand Icons */
 .fa-markdown::before { content: "\f60f"; }
 .fa-js::before { content: "\f3b8"; }

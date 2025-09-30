@@ -29,6 +29,14 @@ class ResourceUri {
             script: this._toUri(context, webview, 'webview', 'sidebar', 'sidebar.js')
         };
     }
+
+    static getDashboardUris(context, webview) {
+        return {
+            fontAwesome: this._toUri(context, webview, 'assets', 'fontawesome', 'fontawesome.css'),
+            style: this._toUri(context, webview, 'webview', 'dashboard', 'dashboard.css'),
+            script: this._toUri(context, webview, 'webview', 'dashboard', 'dashboard.js')
+        };
+    }
 }
 
 module.exports = { ResourceUri };
