@@ -1,31 +1,62 @@
 {
   "name": "spec-viewer",
+  "displayName": "Spec Viewer",
   "version": "1.0.0",
-  "description": "A CLI tool for viewing spec-kit generated documentation",
-  "main": "index.js",
+  "description": "A VSCode extension for viewing spec-kit generated documentation",
+  "main": "extension/extension.js",
   "bin": {
-    "spec-viewer": "./bin/spec-viewer.js"
+    "spec-viewer": "bin/spec-viewer.js"
+  },
+  "engines": {
+    "vscode": "^1.104.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "spec-viewer.open",
+        "title": "Open Spec Viewer"
+      }
+    ]
   },
   "scripts": {
     "demo": "node bin/spec-viewer.js demo --port 3003",
-    "install-global": "npm install -g ."
+    "install-cli": "npm install -g .",
+    "package": "vsce package",
+    "install-extension": "vsce package && code --install-extension spec-viewer-1.0.0.vsix"
   },
   "keywords": [
     "spec-kit",
     "documentation",
     "viewer",
     "markdown",
-    "cli"
+    "vscode-extension"
   ],
   "author": "",
+  "publisher": "local",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "commander": "^11.0.0",
     "chokidar": "^3.5.3",
-    "marked": "^9.1.2",
-    "socket.io": "^4.7.2",
+    "commander": "^11.0.0",
+    "express": "^4.18.2",
     "ignore": "^5.2.4",
-    "mime-types": "^2.1.35"
-  }
+    "marked": "^9.1.2",
+    "mime-types": "^2.1.35",
+    "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.104.0",
+    "@vscode/vsce": "^3.6.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PaodingSoftware/spec-viewer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PaodingSoftware/spec-viewer/issues"
+  },
+  "homepage": "https://github.com/PaodingSoftware/spec-viewer#readme"
 }

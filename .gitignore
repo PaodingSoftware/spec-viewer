@@ -61,6 +61,9 @@ web_modules/
 # Output of 'npm pack'
 *.tgz
 
+# VSCode extension package
+*.vsix
+
 # Yarn Integrity file
 .yarn-integrity
 
