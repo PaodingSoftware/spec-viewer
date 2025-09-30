@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const { SidebarProvider } = require('./providers/sidebar-provider');
 const { FileViewerProvider } = require('./providers/file-viewer-provider');
+const { SenatusInstaller } = require('./utils/senatus-installer');
 
 let sidebarProvider = null;
 let fileViewerProvider = null;
@@ -49,6 +50,23 @@ function activate(context) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('spec-viewer.refresh', async () => {
+            if (sidebarProvider.view) {
+                await sidebarProvider.fileFilter.initialize();
+                const tree = await sidebarProvider.getDirectoryTree(workspaceFolder);
+                sidebarProvider.view.webview.postMessage({
+                    command: 'refresh',
+                    tree: tree
+                });
+            }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('spec-viewer.installSenatus', async () => {
+            const installer = new SenatusInstaller(context.extensionPath);
+            await installer.install(workspaceFolder);
+
+            // Refresh the sidebar after installation
             if (sidebarProvider.view) {
                 await sidebarProvider.fileFilter.initialize();
                 const tree = await sidebarProvider.getDirectoryTree(workspaceFolder);

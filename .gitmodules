@@ -1,0 +1,3 @@
+[submodule "senatus"]
+	path = senatus
+	url = https://github.com/PaodingSoftware/senatus

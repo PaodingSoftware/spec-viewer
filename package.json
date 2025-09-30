@@ -51,6 +51,12 @@
         "title": "Refresh",
         "category": "Spec Viewer",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "spec-viewer.installSenatus",
+        "title": "Install Senatus Framework",
+        "category": "Spec Viewer",
+        "icon": "$(cloud-download)"
       }
     ],
     "menus": {
