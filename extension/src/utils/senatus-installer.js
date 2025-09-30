@@ -47,17 +47,21 @@ class SenatusInstaller {
             }
 
             // Create target directories
-            const claudeDir = path.join(workspaceFolder, '.claude');
-            const commandsDir = path.join(claudeDir, 'commands');
+            const commandsDir = path.join(workspaceFolder, '.claude', 'commands');
+            const promptsDir = path.join(workspaceFolder, '.github', 'prompts');
             const specifyDir = path.join(workspaceFolder, '.specify');
 
-            await fs.mkdir(claudeDir, { recursive: true });
             await fs.mkdir(commandsDir, { recursive: true });
+            await fs.mkdir(promptsDir, { recursive: true });
             await fs.mkdir(specifyDir, { recursive: true });
 
-            // Copy commands
+            // Copy claude commands
             const sourceCommandsDir = path.join(this.senatusPath, '.claude', 'commands');
             await this.copyDirectory(sourceCommandsDir, commandsDir);
+
+            // Copy copilot prompts
+            const sourcePromptsDir = path.join(this.senatusPath, '.github', 'prompts');
+            await this.copyDirectory(sourcePromptsDir, promptsDir);
 
             // Copy specify templates
             const sourceSpecifyDir = path.join(this.senatusPath, '.specify');
