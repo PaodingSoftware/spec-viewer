@@ -152,10 +152,12 @@ html, body {
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 6px 14px;
   font-size: 13px;
   font-weight: 500;
-  line-height: 20px;
+  line-height: 1;
   white-space: nowrap;
   vertical-align: middle;
   cursor: pointer;
@@ -173,7 +175,7 @@ html, body {
 }
 
 .btn-sm {
-  padding: 4px 10px;
+  padding: 6px 10px;
   font-size: 12px;
 }
 
@@ -188,7 +190,9 @@ html, body {
 }
 
 .btn i {
-  margin-right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Resize Handles */
