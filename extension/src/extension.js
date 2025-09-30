@@ -46,6 +46,19 @@ function activate(context) {
             }
         })
     );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('spec-viewer.refresh', async () => {
+            if (sidebarProvider.view) {
+                await sidebarProvider.fileFilter.initialize();
+                const tree = await sidebarProvider.getDirectoryTree(workspaceFolder);
+                sidebarProvider.view.webview.postMessage({
+                    command: 'refresh',
+                    tree: tree
+                });
+            }
+        })
+    );
 }
 
 /**

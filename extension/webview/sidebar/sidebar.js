@@ -50,6 +50,7 @@
     window.addEventListener('message', event => {
         const message = event.data;
         switch (message.command) {
+            case 'refresh':
             case 'treeData':
                 fileTree = message.tree;
                 renderTree();

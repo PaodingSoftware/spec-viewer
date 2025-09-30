@@ -9,6 +9,7 @@
 # Documentation directories
 spec/
 docs/
+specify/
 
 # Specific documentation files
 README.md

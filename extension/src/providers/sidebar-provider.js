@@ -105,14 +105,6 @@ class SidebarProvider extends WebviewBase {
                 case 'openFile':
                     vscode.commands.executeCommand('spec-viewer.openFile', message.path);
                     break;
-                case 'refresh':
-                    await this.fileFilter.initialize();
-                    const newTree = await this.getDirectoryTree(this.workspaceFolder);
-                    webviewView.webview.postMessage({
-                        command: 'treeData',
-                        tree: newTree
-                    });
-                    break;
             }
         });
     }
