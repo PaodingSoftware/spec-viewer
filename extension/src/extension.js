@@ -7,6 +7,20 @@ let sidebarProvider = null;
 let fileViewerProvider = null;
 
 /**
+ * Refresh file tree
+ */
+async function refreshFileTree() {
+    if (sidebarProvider && sidebarProvider.view) {
+        await sidebarProvider.fileFilter.initialize();
+        const tree = await sidebarProvider.getDirectoryTree(sidebarProvider.workspaceFolder);
+        sidebarProvider.view.webview.postMessage({
+            command: 'refresh',
+            tree: tree
+        });
+    }
+}
+
+/**
  * Activate the extension
  * @param {vscode.ExtensionContext} context
  */
@@ -25,6 +39,30 @@ function activate(context) {
     // Initialize sidebar provider
     sidebarProvider = new SidebarProvider(context, workspaceFolder);
     sidebarProvider.initialize();
+
+    // Watch for file system changes
+    const watcher = vscode.workspace.createFileSystemWatcher('**/*');
+
+    // Debounce refresh to avoid too many updates
+    let refreshTimeout = null;
+    const debouncedRefresh = () => {
+        if (refreshTimeout) {
+            clearTimeout(refreshTimeout);
+        }
+        refreshTimeout = setTimeout(() => {
+            refreshFileTree();
+        }, 300);
+    };
+
+    context.subscriptions.push(watcher.onDidCreate(debouncedRefresh));
+    context.subscriptions.push(watcher.onDidDelete(debouncedRefresh));
+    context.subscriptions.push(watcher.onDidChange((uri) => {
+        // Only refresh if .specinclude changed
+        if (uri.fsPath.endsWith('.specinclude')) {
+            debouncedRefresh();
+        }
+    }));
+    context.subscriptions.push(watcher);
 
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider('specViewerExplorer', sidebarProvider)
@@ -50,14 +88,7 @@ function activate(context) {
 
     context.subscriptions.push(
         vscode.commands.registerCommand('spec-viewer.refresh', async () => {
-            if (sidebarProvider.view) {
-                await sidebarProvider.fileFilter.initialize();
-                const tree = await sidebarProvider.getDirectoryTree(workspaceFolder);
-                sidebarProvider.view.webview.postMessage({
-                    command: 'refresh',
-                    tree: tree
-                });
-            }
+            await refreshFileTree();
         })
     );
 
@@ -66,15 +97,8 @@ function activate(context) {
             const installer = new SenatusInstaller(context.extensionPath);
             await installer.install(workspaceFolder);
 
-            // Refresh the sidebar after installation
-            if (sidebarProvider.view) {
-                await sidebarProvider.fileFilter.initialize();
-                const tree = await sidebarProvider.getDirectoryTree(workspaceFolder);
-                sidebarProvider.view.webview.postMessage({
-                    command: 'refresh',
-                    tree: tree
-                });
-            }
+            // Refresh the file tree after installation
+            await refreshFileTree();
         })
     );
 }

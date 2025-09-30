@@ -51,6 +51,12 @@ class FileViewerProvider extends WebviewBase {
             }
         );
 
+        // Set custom wizard hat icon for the tab
+        panel.iconPath = {
+            light: vscode.Uri.file(path.join(this.context.extensionPath, 'extension/icons/spec-light.svg')),
+            dark: vscode.Uri.file(path.join(this.context.extensionPath, 'extension/icons/spec-dark.svg'))
+        };
+
         // Store panel reference and initial state
         this.panels.set(filePath, panel);
         this.panelStates.set(filePath, { viewMode: 'preview' });
