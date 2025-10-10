@@ -357,6 +357,11 @@ body {
     transform: none;
 }
 
+.topic-icons {
+    display: flex;
+    align-items: center;
+}
+
 .topic-sequence {
     font-family: var(--font-mono);
     font-size: 13px;

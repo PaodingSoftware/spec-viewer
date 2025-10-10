@@ -301,10 +301,15 @@
             researchIndicator.style.cursor = 'pointer';
         }
 
+        // Create a container for the icons on the right
+        const iconsContainer = document.createElement('div');
+        iconsContainer.className = 'topic-icons';
+        iconsContainer.appendChild(researchIndicator);
+        iconsContainer.appendChild(stageBadge);
+
         item.appendChild(sequence);
         item.appendChild(info);
-        item.appendChild(researchIndicator);
-        item.appendChild(stageBadge);
+        item.appendChild(iconsContainer);
 
         // Click handler - open discuss.md (only if it has discussions)
         if (canClick) {

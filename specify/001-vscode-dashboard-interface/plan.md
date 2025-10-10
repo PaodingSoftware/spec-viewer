@@ -321,5 +321,16 @@ A29. [✅已完成] 修复仪表盘交互问题（主题卡片点击限制、研
     - 移除 `.research-indicator` 的 `cursor: help`
 - **实现文件**: `dashboard.js`, `dashboard.css`
 
+A30. [✅已完成] 优化主题列表图标布局（添加图标容器）
+- 问题背景：主题列表中的研究标识和阶段标签图标需要更好的对齐和布局
+- 实现内容：
+  - 创建 `.topic-icons` flex 容器包裹研究标识和阶段标签
+  - 使用 flexbox 布局确保图标垂直居中对齐
+  - 修改 DOM 结构，将两个图标元素添加到容器中
+- 修改位置：
+  - `dashboard.css`: 添加 `.topic-icons` 样式（display: flex, align-items: center）
+  - `dashboard.js`: 在 `renderTopicItem()` 函数中创建 iconsContainer 并调整 DOM 结构
+- **实现文件**: `dashboard.css`, `dashboard.js`
+
 ---
 *创建时间: 2025-09-30*
