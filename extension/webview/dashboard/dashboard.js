@@ -102,7 +102,26 @@
         stageBadge.className = `stage-badge stage-${topic.stage}`;
         stageBadge.innerHTML = `<i class="fas ${getStageIcon(topic.stage)}"></i> ${formatStage(topic.stage)}`;
 
+        // Add research completion indicator
+        const researchIndicator = document.createElement('span');
+        researchIndicator.className = `research-indicator ${topic.hasResearch ? 'completed' : 'pending'}`;
+        researchIndicator.title = topic.hasResearch ? 'Research completed' : 'Research not completed';
+        researchIndicator.innerHTML = `<i class="fas fa-search"></i> ${topic.hasResearch ? 'Researched' : 'Not Researched'}`;
+
+        // Click handler for research indicator - open research.md
+        if (topic.hasResearch) {
+            researchIndicator.addEventListener('click', () => {
+                const filePath = `specify/${topic.dirName}/research.md`;
+                vscode.postMessage({
+                    command: 'openFile',
+                    path: filePath
+                });
+            });
+            researchIndicator.style.cursor = 'pointer';
+        }
+
         header.appendChild(title);
+        header.appendChild(researchIndicator);
         header.appendChild(stageBadge);
 
         // Progress bar
@@ -127,10 +146,14 @@
         card.appendChild(header);
         card.appendChild(progressContainer);
 
-        // Task list if exists
+        // Show task list if exists, otherwise show discussion list
         if (topic.tasks && topic.tasks.length > 0) {
             const taskList = renderTaskList(topic.tasks); // Show all tasks
             card.appendChild(taskList);
+        } else if (topic.discussions && topic.discussions.length > 0) {
+            // When no tasks exist yet (early stage), show discussions instead
+            const discussionList = renderDiscussionList(topic.discussions);
+            card.appendChild(discussionList);
         }
 
         return card;
@@ -229,6 +252,12 @@
             item.classList.add('current');
         }
 
+        // If discuss.md doesn't exist (new-topic stage without discussions), make it non-clickable
+        const canClick = topic.discussionCount > 0;
+        if (!canClick) {
+            item.classList.add('disabled');
+        }
+
         const sequence = document.createElement('div');
         sequence.className = 'topic-sequence';
         sequence.textContent = String(topic.sequence).padStart(3, '0');
@@ -254,18 +283,39 @@
         stageBadge.className = `stage-badge stage-${topic.stage}`;
         stageBadge.innerHTML = `<i class="fas ${getStageIcon(topic.stage)}"></i>`;
 
+        const researchIndicator = document.createElement('span');
+        researchIndicator.className = `research-indicator ${topic.hasResearch ? 'completed' : 'pending'}`;
+        researchIndicator.title = topic.hasResearch ? 'Research completed' : 'Research not completed';
+        researchIndicator.innerHTML = `<i class="fas fa-search"></i>`;
+
+        // Click handler for research indicator - open research.md
+        if (topic.hasResearch) {
+            researchIndicator.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const filePath = `specify/${topic.dirName}/research.md`;
+                vscode.postMessage({
+                    command: 'openFile',
+                    path: filePath
+                });
+            });
+            researchIndicator.style.cursor = 'pointer';
+        }
+
         item.appendChild(sequence);
         item.appendChild(info);
+        item.appendChild(researchIndicator);
         item.appendChild(stageBadge);
 
-        // Click handler - open discuss.md
-        item.addEventListener('click', () => {
-            const filePath = `specify/${topic.dirName}/discuss.md`;
-            vscode.postMessage({
-                command: 'openFile',
-                path: filePath
+        // Click handler - open discuss.md (only if it has discussions)
+        if (canClick) {
+            item.addEventListener('click', () => {
+                const filePath = `specify/${topic.dirName}/discuss.md`;
+                vscode.postMessage({
+                    command: 'openFile',
+                    path: filePath
+                });
             });
-        });
+        }
 
         return item;
     }
@@ -278,6 +328,48 @@
         item.className = 'topic-meta-item';
         item.innerHTML = `<i class="fas ${iconClass}"></i> ${text}`;
         return item;
+    }
+
+    /**
+     * Render discussion list
+     */
+    function renderDiscussionList(discussions) {
+        const list = document.createElement('div');
+        list.className = 'discussion-list';
+
+        discussions.forEach(discussion => {
+            const item = document.createElement('div');
+            item.className = 'discussion-item';
+
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-comment discussion-icon';
+
+            const discussionInfo = document.createElement('div');
+            discussionInfo.className = 'discussion-info';
+
+            const discussionId = document.createElement('span');
+            discussionId.className = 'discussion-id';
+            discussionId.textContent = discussion.id;
+
+            const discussionQuestion = document.createElement('span');
+            discussionQuestion.className = 'discussion-question';
+            discussionQuestion.textContent = discussion.question;
+
+            const discussionTime = document.createElement('span');
+            discussionTime.className = 'discussion-time';
+            discussionTime.textContent = discussion.timestamp;
+
+            discussionInfo.appendChild(discussionId);
+            discussionInfo.appendChild(discussionQuestion);
+            discussionInfo.appendChild(discussionTime);
+
+            item.appendChild(icon);
+            item.appendChild(discussionInfo);
+
+            list.appendChild(item);
+        });
+
+        return list;
     }
 
     /**
@@ -324,7 +416,6 @@
     function getStageIcon(stage) {
         const icons = {
             'new-topic': 'fa-plus-circle',
-            'research': 'fa-search',
             'discuss': 'fa-comments',
             'plan': 'fa-clipboard-list',
             'action': 'fa-bolt',
@@ -339,7 +430,6 @@
     function formatStage(stage) {
         const names = {
             'new-topic': 'New Topic',
-            'research': 'Research',
             'discuss': 'Discussion',
             'plan': 'Planning',
             'action': 'In Action',

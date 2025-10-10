@@ -26,7 +26,10 @@
 }
 
 /* Base Classes */
-.fa, .fas, .far, .fab {
+.fa,
+.fas,
+.far,
+.fab {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   display: inline-block;
@@ -36,73 +39,218 @@
   text-rendering: auto;
 }
 
-.fa-solid, .fas {
+.fa-solid,
+.fas {
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
 }
 
-.fa-regular, .far {
+.fa-regular,
+.far {
   font-family: "Font Awesome 6 Free";
   font-weight: 400;
 }
 
-.fa-brands, .fab {
+.fa-brands,
+.fab {
   font-family: "Font Awesome 6 Brands";
   font-weight: 400;
 }
 
 /* Icon Definitions - Solid & Regular */
-.fa-folder::before { content: "\f07b"; }
-.fa-folder-open::before { content: "\f07c"; }
-.fa-file::before { content: "\f15b"; }
-.fa-file-lines::before { content: "\f15c"; }
-.fa-file-code::before { content: "\f1c9"; }
-.fa-file-pdf::before { content: "\f1c1"; }
-.fa-file-word::before { content: "\f1c2"; }
-.fa-file-excel::before { content: "\f1c3"; }
-.fa-file-powerpoint::before { content: "\f1c4"; }
-.fa-file-image::before { content: "\f1c5"; }
-.fa-file-audio::before { content: "\f1c7"; }
-.fa-file-video::before { content: "\f1c8"; }
-.fa-file-zipper::before { content: "\f1c6"; }
-.fa-file-csv::before { content: "\f6dd"; }
-.fa-file-alt::before { content: "\f15c"; }
-.fa-chevron-right::before { content: "\f054"; }
-.fa-gear::before { content: "\f013"; }
-.fa-braces::before { content: "\f7ea"; }
-.fa-spinner::before { content: "\f110"; }
-.fa-code::before { content: "\f121"; }
-.fa-list::before { content: "\f03a"; }
-.fa-info-circle::before { content: "\f05a"; }
+.fa-folder::before {
+  content: "\f07b";
+}
+
+.fa-folder-open::before {
+  content: "\f07c";
+}
+
+.fa-file::before {
+  content: "\f15b";
+}
+
+.fa-file-lines::before {
+  content: "\f15c";
+}
+
+.fa-file-code::before {
+  content: "\f1c9";
+}
+
+.fa-file-pdf::before {
+  content: "\f1c1";
+}
+
+.fa-file-word::before {
+  content: "\f1c2";
+}
+
+.fa-file-excel::before {
+  content: "\f1c3";
+}
+
+.fa-file-powerpoint::before {
+  content: "\f1c4";
+}
+
+.fa-file-image::before {
+  content: "\f1c5";
+}
+
+.fa-file-audio::before {
+  content: "\f1c7";
+}
+
+.fa-file-video::before {
+  content: "\f1c8";
+}
+
+.fa-file-zipper::before {
+  content: "\f1c6";
+}
+
+.fa-file-csv::before {
+  content: "\f6dd";
+}
+
+.fa-file-alt::before {
+  content: "\f15c";
+}
+
+.fa-chevron-right::before {
+  content: "\f054";
+}
+
+.fa-gear::before {
+  content: "\f013";
+}
+
+.fa-braces::before {
+  content: "\f7ea";
+}
+
+.fa-spinner::before {
+  content: "\f110";
+}
+
+.fa-code::before {
+  content: "\f121";
+}
+
+.fa-list::before {
+  content: "\f03a";
+}
+
+.fa-info-circle::before {
+  content: "\f05a";
+}
 
 /* Dashboard Icons */
-.fa-chart-line::before { content: "\f201"; }
-.fa-sync-alt::before { content: "\f2f1"; }
-.fa-comments::before { content: "\f086"; }
-.fa-tasks::before { content: "\f0ae"; }
-.fa-check-circle::before { content: "\f058"; }
-.fa-layer-group::before { content: "\f5fd"; }
-.fa-circle::before { content: "\f111"; }
-.fa-plus-circle::before { content: "\f055"; }
-.fa-search::before { content: "\f002"; }
-.fa-clipboard-list::before { content: "\f46d"; }
-.fa-bolt::before { content: "\f0e7"; }
+.fa-chart-line::before {
+  content: "\f201";
+}
+
+.fa-sync-alt::before {
+  content: "\f2f1";
+}
+
+.fa-comment::before {
+  content: "\f075";
+}
+
+.fa-comments::before {
+  content: "\f086";
+}
+
+.fa-tasks::before {
+  content: "\f0ae";
+}
+
+.fa-check-circle::before {
+  content: "\f058";
+}
+
+.fa-layer-group::before {
+  content: "\f5fd";
+}
+
+.fa-circle::before {
+  content: "\f111";
+}
+
+.fa-plus-circle::before {
+  content: "\f055";
+}
+
+.fa-search::before {
+  content: "\f002";
+}
+
+.fa-clipboard-list::before {
+  content: "\f46d";
+}
+
+.fa-bolt::before {
+  content: "\f0e7";
+}
 
 /* Brand Icons */
-.fa-markdown::before { content: "\f60f"; }
-.fa-js::before { content: "\f3b8"; }
-.fa-react::before { content: "\f41b"; }
-.fa-python::before { content: "\f3e2"; }
-.fa-java::before { content: "\f4e4"; }
-.fa-php::before { content: "\f457"; }
-.fa-swift::before { content: "\f8e1"; }
-.fa-html5::before { content: "\f13b"; }
-.fa-css3-alt::before { content: "\f38b"; }
-.fa-sass::before { content: "\f41e"; }
-.fa-vuejs::before { content: "\f41f"; }
-.fa-git-alt::before { content: "\f841"; }
-.fa-docker::before { content: "\f395"; }
-.fa-npm::before { content: "\f3d4"; }
+.fa-markdown::before {
+  content: "\f60f";
+}
+
+.fa-js::before {
+  content: "\f3b8";
+}
+
+.fa-react::before {
+  content: "\f41b";
+}
+
+.fa-python::before {
+  content: "\f3e2";
+}
+
+.fa-java::before {
+  content: "\f4e4";
+}
+
+.fa-php::before {
+  content: "\f457";
+}
+
+.fa-swift::before {
+  content: "\f8e1";
+}
+
+.fa-html5::before {
+  content: "\f13b";
+}
+
+.fa-css3-alt::before {
+  content: "\f38b";
+}
+
+.fa-sass::before {
+  content: "\f41e";
+}
+
+.fa-vuejs::before {
+  content: "\f41f";
+}
+
+.fa-git-alt::before {
+  content: "\f841";
+}
+
+.fa-docker::before {
+  content: "\f395";
+}
+
+.fa-npm::before {
+  content: "\f3d4";
+}
 
 /* Animations */
 .fa-spin {
@@ -110,6 +258,11 @@
 }
 
 @keyframes fa-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

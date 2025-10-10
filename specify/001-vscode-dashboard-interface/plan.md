@@ -166,5 +166,160 @@ A20. [✅已完成] 修复仪表盘按钮位置不生效问题（使用 navigati
 - refresh 按钮使用 `@1`（最左），collapseAll 使用 `@2`（中间），openDashboard 使用 `@3`（最右）
 - **实现文件**: `package.json`
 
+A21. [✅已完成] 修复仪表盘在讨论阶段不显示内容的问题
+- 诊断问题：当主题没有到达 plan/action 阶段时（只有讨论阶段），当前主题卡片不显示任何内容
+- 根本原因：`renderCurrentTopicCard()` 函数只在有任务时才渲染列表，忽略了早期阶段的讨论记录
+- 修复方案：
+  - 优先显示任务列表（如果存在）
+  - 如果没有任务，则显示讨论列表作为替代
+  - 新增 `renderDiscussionList()` 函数渲染讨论记录
+  - 添加讨论列表的 CSS 样式
+  - 在 fontawesome.css 中添加 `fa-comment` 图标
+- **实现文件**: `dashboard.js`, `dashboard.css`, `fontawesome.css`
+
+A22. [✅已完成] 修复讨论记录解析失败的问题（正则表达式格式错误）
+- 诊断问题：虽然添加了讨论列表显示功能，但讨论列表仍然不显示，`parseDiscuss()` 返回空数组
+- 根本原因：正则表达式格式错误，无法匹配实际的讨论记录格式
+- 问题详情：
+  - 原正则：`/### (D\d+) - (.+?)\n\*\*问题\*\*: (.+?)\n\*\*结论\*\*:/gs`（问题后有空格）
+  - 实际格式：`**问题**:` 冒号后直接是空格和内容，不是 `: `（冒号空格）
+- 修复方案：
+  - 更新正则为：`/### (D\d+) - (.+?)\n\*\*问题\*\*:\s*(.+?)\n+\*\*结论\*\*:/gs`
+  - 使用 `\s*` 匹配冒号后的可选空白字符
+  - 使用 `\n+` 匹配一个或多个换行符
+  - 保留 `\r?` 支持 Windows 换行符（虽然当前使用 `\n`）
+  - 添加注释说明实际格式
+- 测试验证：创建测试脚本验证正则能正确匹配10条真实讨论记录
+- **实现文件**: `senatus-parser.js`
+
+A23. [✅已完成] 修复 HTML 注释样例被误识别为真实数据的问题
+- 问题背景：在 `discuss.md` 和 `plan.md` 文件中，有 HTML 注释样例展示格式示例，被正则表达式误匹配为真实的讨论记录和任务
+- 根本原因：正则表达式直接在原始文本上匹配，包括 HTML 注释 `<!-- -->` 内的内容
+- 问题影响：
+  - `discuss.md` 中的注释样例（`### D01 - YYYY-MM-DD HH:MM:SS`）被误识别为讨论记录
+  - `plan.md` 中的注释样例（`A01. [状态] 行动描述`）被误识别为任务
+- 修复方案：
+  - 在 `parseDiscuss()` 和 `parsePlan()` 方法中，先使用 `content.replace(/<!--[\s\S]*?-->/g, '')` 移除所有 HTML 注释
+  - 然后再进行正则表达式匹配
+  - 使用非贪婪匹配 `[\s\S]*?` 确保正确匹配多行注释
+- 修改位置：
+  - `senatus-parser.js` 的 `parseDiscuss()` 方法
+  - `senatus-parser.js` 的 `parsePlan()` 方法
+- **实现文件**: `senatus-parser.js`
+
+A24. [✅已完成] 添加研究完成标识和优化进度条计算
+- 需求背景：用户要求单独提供图标标识topic是否完成研究，并且进度条应按主要阶段切分，即使没到action阶段也有进度
+- 实现内容：
+  - 添加研究完成标识：在当前主题卡片和主题列表中添加独立的研究完成图标（搜索图标）
+    - 已完成研究：绿色圆形背景
+    - 未完成研究：灰色圆形背景
+    - 位置：在阶段标签左侧
+  - 优化进度条计算：按阶段分配基础进度
+    - new-topic: 10%
+    - research: 20%
+    - discuss: 30%
+    - plan: 40%
+    - action: 40-100%（基础40% + 任务完成率60%）
+    - completed: 100%
+- 修改位置：
+  - `senatus-parser.js`: 添加 `hasResearch` 字段和新的 `calculateCompletionRate()` 方法
+  - `dashboard.js`: 添加研究完成标识图标的渲染逻辑（在当前主题卡片和主题列表中）
+  - `dashboard.css`: 添加 `.research-indicator` 样式
+- **实现文件**: `senatus-parser.js`, `dashboard.js`, `dashboard.css`
+
+A25. [✅已完成] 修复阶段判断逻辑和优化研究标识样式
+- 问题背景：进入discuss阶段的判断应基于讨论列表是否为空，而不是research.md文件是否存在；研究标识图标应与阶段标签采用相同风格
+- 实现内容：
+  - 修复阶段判断逻辑：
+    - 将 `determineStage()` 方法的判断从基于 research.md 文件存在改为基于 discussionCount > 0
+    - 重构方法签名，将 discussionCount 作为参数传入
+    - 调整 `parseTopic()` 方法中的调用顺序，先解析 discuss.md 再判断阶段
+  - 优化研究标识样式：
+    - 从圆形图标改为与阶段标签相同的徽章样式（带文字）
+    - 添加文字显示："Researched" / "Not Researched"
+    - 颜色调整：已完成使用蓝色（#0969da），未完成使用灰色
+    - 保持与阶段标签一致的视觉风格
+- 修改位置：
+  - `senatus-parser.js`: 修改 `determineStage()` 方法和 `parseTopic()` 调用顺序
+  - `dashboard.css`: 更新 `.research-indicator` 样式
+  - `dashboard.js`: 在两处添加研究标识的文字显示
+- **实现文件**: `senatus-parser.js`, `dashboard.css`, `dashboard.js`
+
+A26. [✅已完成] 将 research 从 stage progression 中移除，使其成为独立属性
+- 问题背景：research 不应该作为阶段流程的一部分，而应该是一个独立的标识属性
+- 实现内容：
+  - 修改阶段流程：从 new-topic → research → discuss → plan → action 改为 new-topic → discuss → plan → action → completed
+  - research 通过 `hasResearch` 字段独立跟踪，不再作为阶段
+  - 移除 research 阶段判断逻辑：在 `determineStage()` 方法中删除 research 阶段的判断
+  - 重新分配进度权重：
+    - new-topic: 10%（不变）
+    - discuss: 30%（不变）
+    - plan: 40% → 50%（+10%）
+    - action: 40-100% → 50-100%（基础进度+10%，任务完成权重从60%改为50%）
+    - completed: 100%（不变）
+  - 移除前端 research 阶段支持：
+    - 删除 `getStageIcon()` 中的 research 图标定义
+    - 删除 `formatStage()` 中的 research 名称定义
+    - 删除 CSS 中的 `.stage-badge.stage-research` 样式
+- 修改位置：
+  - `senatus-parser.js`: 修改 `determineStage()` 和 `calculateCompletionRate()` 方法
+  - `dashboard.js`: 移除 research 阶段的图标和名称定义
+  - `dashboard.css`: 移除 research 阶段样式
+- **实现文件**: `senatus-parser.js`, `dashboard.js`, `dashboard.css`
+
+A27. [✅已完成] 修改研究标识颜色为紫色
+- 问题背景：用户要求将研究标识的颜色改为 #8250df（紫色）
+- 实现内容：
+  - 将研究完成标识的背景颜色从蓝色（#0969da）改为紫色（#8250df）
+  - 紫色原本是 research 阶段使用的颜色，现在 research 不再是阶段，这个颜色可以用于研究标识
+  - 使用独特的紫色可以更好地区分研究标识和阶段标签（阶段标签使用蓝色、绿色、黄色等）
+- 修改位置：
+  - `dashboard.css`: 修改 `.research-indicator.completed` 的 `background-color` 从 #0969da 改为 #8250df
+- **实现文件**: `dashboard.css`
+
+A28. [✅已完成] 调整主题列表中研究标识样式，使其与阶段标签尺寸一致
+- 问题背景：All Topics 列表中，主题卡片里的研究标识应该和旁边的 stage 标识尺寸一致，并且不显示文本
+- 实现内容：
+  - 为主题列表中的研究标识只显示图标（只显示图标）
+  - JavaScript 修改：
+    - 在 `renderTopicItem()` 函数中，移除研究标识的文本部分（"Researched" / "Not Researched"）
+    - 只保留图标 `<i class="fas fa-search"></i>`
+- 设计理由：
+  - 主题列表项空间有限，图标式设计更简洁
+  - 与 stage badge 尺寸统一，视觉更整齐
+  - 当前主题卡片保留详细文字说明
+  - 鼠标悬停时仍有 title 提示
+- 修改位置：
+  - `dashboard.js`: 修改 `renderTopicItem()` 函数中的研究标识渲染逻辑
+- **实现文件**: `dashboard.js`
+
+A29. [✅已完成] 修复仪表盘交互问题（主题卡片点击限制、研究标识点击、鼠标样式）
+- 问题背景：
+  - 当 discuss.md 还不存在（new-topic 阶段）时，点击主题卡片会跳转到不存在的文件导致错误
+  - 点击研究标识应该跳转到研究报告文件（research.md）
+  - 鼠标划到研究标识时不应显示问号（cursor: help）
+- 实现内容：
+  - 修复1（主题卡片点击限制）：
+    - 当主题 `discussionCount === 0` 时，主题卡片不可点击
+    - 添加 `disabled` 类，设置 `cursor: not-allowed`、`opacity: 0.6`
+    - 移除点击事件监听器，禁用 hover 效果
+  - 修复2（研究标识点击功能）：
+    - 为研究标识添加点击事件，跳转到 `specify/{topic.dirName}/research.md`
+    - 两处实现：当前主题卡片和主题列表
+    - 只有 `hasResearch === true` 时才可点击
+    - 使用 `e.stopPropagation()` 防止事件冒泡
+  - 修复3（鼠标样式修复）：
+    - 从 CSS 移除 `cursor: help`
+    - 当 `hasResearch === true` 时动态设置 `cursor: pointer`
+    - 否则使用默认光标
+- 修改位置：
+  - `dashboard.js`: 
+    - `renderTopicItem()`: 添加点击限制逻辑和研究标识点击事件
+    - `renderCurrentTopicCard()`: 添加研究标识点击事件
+  - `dashboard.css`: 
+    - 添加 `.topic-item.disabled` 样式
+    - 移除 `.research-indicator` 的 `cursor: help`
+- **实现文件**: `dashboard.js`, `dashboard.css`
+
 ---
 *创建时间: 2025-09-30*

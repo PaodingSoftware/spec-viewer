@@ -82,9 +82,6 @@ class SenatusParser {
             // Check which files exist
             const files = await this.getTopicFiles(topicPath);
 
-            // Determine stage
-            const stage = this.determineStage(files);
-
             // Parse discuss.md if exists
             const discussData = files.has('discuss.md')
                 ? await this.parseDiscuss(path.join(topicPath, 'discuss.md'))
@@ -95,11 +92,20 @@ class SenatusParser {
                 ? await this.parsePlan(path.join(topicPath, 'plan.md'))
                 : { taskCount: 0, completedCount: 0, tasks: [] };
 
+            // Determine stage based on files and discussion count
+            const stage = this.determineStage(files, discussData.discussionCount);
+
             // Update stage to 'completed' if all tasks are done
             let finalStage = stage;
             if (stage === 'action' && planData.taskCount > 0 && planData.taskCount === planData.completedCount) {
                 finalStage = 'completed';
             }
+
+            // Check if research is completed
+            const hasResearch = files.has('research.md');
+
+            // Calculate completion rate based on stages
+            const completionRate = this.calculateCompletionRate(finalStage, planData.taskCount, planData.completedCount);
 
             return {
                 sequence,
@@ -107,13 +113,12 @@ class SenatusParser {
                 dirName,
                 stage: finalStage,
                 files: Array.from(files),
+                hasResearch: hasResearch,
                 discussionCount: discussData.discussionCount,
                 discussions: discussData.discussions,
                 taskCount: planData.taskCount,
                 completedCount: planData.completedCount,
-                completionRate: planData.taskCount > 0
-                    ? Math.round((planData.completedCount / planData.taskCount) * 100)
-                    : 0,
+                completionRate: completionRate,
                 tasks: planData.tasks
             };
         } catch (error) {
@@ -139,12 +144,14 @@ class SenatusParser {
     }
 
     /**
-     * Determine topic stage based on existing files
-     * Stage progression: new-topic → research → discuss/inspire → plan → action
+     * Determine topic stage based on existing files and discussion count
+     * Stage progression: new-topic → discuss → plan → action → completed
+     * Research is independent and tracked separately via hasResearch field
      * @param {Set<string>} files - Set of file names
+     * @param {number} discussionCount - Number of discussions in discuss.md
      * @returns {string} Stage name
      */
-    determineStage(files) {
+    determineStage(files, discussionCount = 0) {
         // Check implementation directory for action stage
         if (files.has('implementation')) {
             return 'action';
@@ -152,12 +159,11 @@ class SenatusParser {
         if (files.has('plan.md')) {
             return 'plan';
         }
-        if (files.has('discuss.md') && files.has('research.md')) {
+        // Enter discuss stage when discussion list is not empty
+        if (files.has('discuss.md') && discussionCount > 0) {
             return 'discuss';
         }
-        if (files.has('research.md')) {
-            return 'research';
-        }
+        // Default to new-topic stage
         if (files.has('discuss.md')) {
             return 'new-topic';
         }
@@ -171,10 +177,13 @@ class SenatusParser {
      */
     async parseDiscuss(filePath) {
         try {
-            const content = await fs.readFile(filePath, 'utf8');
+            let content = await fs.readFile(filePath, 'utf8');
+
+            // Remove HTML comments to avoid matching example patterns
+            content = content.replace(/<!--[\s\S]*?-->/g, '');
 
             // Use regex to extract discussion records: ### D01 - YYYY-MM-DD HH:MM:SS
-            const discussionRegex = /### (D\d+) - (.+?)\n\*\*问题\*\*: (.+?)\n\*\*结论\*\*:/gs;
+            const discussionRegex = /### (D\d+) - (.+?)\n\*\*问题\*\*:\s*(.+?)\n+\*\*结论\*\*:/gs;
             const discussions = [];
             let match;
 
@@ -202,7 +211,10 @@ class SenatusParser {
      */
     async parsePlan(filePath) {
         try {
-            const content = await fs.readFile(filePath, 'utf8');
+            let content = await fs.readFile(filePath, 'utf8');
+
+            // Remove HTML comments to avoid matching example patterns
+            content = content.replace(/<!--[\s\S]*?-->/g, '');
 
             // Use regex to extract tasks: A01. [⏳待执行] or A01. [✅已完成]
             const taskRegex = /^(A\d+)\. \[(⏳|✅)[^\]]*\] (.+?)$/gm;
@@ -229,6 +241,37 @@ class SenatusParser {
         } catch (error) {
             return { taskCount: 0, completedCount: 0, tasks: [] };
         }
+    }
+
+    /**
+     * Calculate completion rate based on stage
+     * Stage weights: new-topic(10%), discuss(30%), plan(50%), action(50-100% based on tasks)
+     * Research is independent and does not affect stage progression
+     * @param {string} stage - Current stage
+     * @param {number} taskCount - Total task count
+     * @param {number} completedCount - Completed task count
+     * @returns {number} Completion rate (0-100)
+     */
+    calculateCompletionRate(stage, taskCount, completedCount) {
+        const stageWeights = {
+            'new-topic': 10,
+            'discuss': 30,
+            'plan': 50,
+            'action': 50,
+            'completed': 100
+        };
+
+        const baseProgress = stageWeights[stage] || 0;
+
+        // For action and completed stages, calculate task-based progress
+        if (stage === 'action' && taskCount > 0) {
+            const taskProgress = (completedCount / taskCount) * 50; // 50% weight for tasks (50% to 100%)
+            return Math.round(baseProgress + taskProgress);
+        } else if (stage === 'completed') {
+            return 100;
+        }
+
+        return baseProgress;
     }
 
     /**
