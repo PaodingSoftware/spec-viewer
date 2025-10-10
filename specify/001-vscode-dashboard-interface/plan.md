@@ -332,5 +332,7 @@ A30. [✅已完成] 优化主题列表图标布局（添加图标容器）
   - `dashboard.js`: 在 `renderTopicItem()` 函数中创建 iconsContainer 并调整 DOM 结构
 - **实现文件**: `dashboard.css`, `dashboard.js`
 
+A31. [✅已完成] 调整侧边栏标题栏按钮顺序，将仪表盘按钮移到最右侧
+
 ---
 *创建时间: 2025-09-30*
