@@ -185,11 +185,31 @@ body {
     color: white;
 }
 
-.stage-badge.stage-new-topic { background-color: var(--color-neutral-muted); color: var(--color-fg-default); }
-.stage-badge.stage-research { background-color: #8250df; }
-.stage-badge.stage-discuss { background-color: #0969da; }
-.stage-badge.stage-plan { background-color: var(--color-warning); }
-.stage-badge.stage-action { background-color: var(--color-success); }
+.stage-badge.stage-new-topic {
+    background-color: var(--color-neutral-muted);
+    color: var(--color-fg-default);
+}
+
+.stage-badge.stage-research {
+    background-color: #8250df;
+}
+
+.stage-badge.stage-discuss {
+    background-color: #0969da;
+}
+
+.stage-badge.stage-plan {
+    background-color: var(--color-warning);
+}
+
+.stage-badge.stage-action {
+    background-color: var(--color-success);
+}
+
+.stage-badge.stage-completed {
+    background-color: #1a7f37;
+    color: white;
+}
 
 /* Progress Bar */
 .progress-bar-container {

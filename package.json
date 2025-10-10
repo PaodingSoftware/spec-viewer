@@ -68,19 +68,19 @@
     "menus": {
       "view/title": [
         {
-          "command": "spec-viewer.openDashboard",
-          "when": "view == specViewerExplorer",
-          "group": "navigation"
-        },
-        {
           "command": "spec-viewer.refresh",
           "when": "view == specViewerExplorer",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "spec-viewer.collapseAll",
           "when": "view == specViewerExplorer",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "spec-viewer.openDashboard",
+          "when": "view == specViewerExplorer",
+          "group": "navigation@3"
         }
       ],
       "commandPalette": [

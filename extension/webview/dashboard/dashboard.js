@@ -327,7 +327,8 @@
             'research': 'fa-search',
             'discuss': 'fa-comments',
             'plan': 'fa-clipboard-list',
-            'action': 'fa-bolt'
+            'action': 'fa-bolt',
+            'completed': 'fa-check-circle'
         };
         return icons[stage] || 'fa-circle';
     }
@@ -341,7 +342,8 @@
             'research': 'Research',
             'discuss': 'Discussion',
             'plan': 'Planning',
-            'action': 'In Action'
+            'action': 'In Action',
+            'completed': 'Completed'
         };
         return names[stage] || stage;
     }

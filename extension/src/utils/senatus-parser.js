@@ -95,11 +95,17 @@ class SenatusParser {
                 ? await this.parsePlan(path.join(topicPath, 'plan.md'))
                 : { taskCount: 0, completedCount: 0, tasks: [] };
 
+            // Update stage to 'completed' if all tasks are done
+            let finalStage = stage;
+            if (stage === 'action' && planData.taskCount > 0 && planData.taskCount === planData.completedCount) {
+                finalStage = 'completed';
+            }
+
             return {
                 sequence,
                 name,
                 dirName,
-                stage,
+                stage: finalStage,
                 files: Array.from(files),
                 discussionCount: discussData.discussionCount,
                 discussions: discussData.discussions,

@@ -102,5 +102,29 @@
   2. 所有主题列表中每个主题的阶段标签
 - 符合宪法约束：正确使用 Font Awesome 图标系统
 
+### D08 - 2025-10-10 10:00:00
+**问题**: 仪表盘入口图标应该放在三个图标的最右侧。当plan中的所有任务都完成之后，状态应该从In Action转变为一种完成的状态，这个时候可以允许纠正。
+
+**结论**:
+- 修复问题1（图标位置）：在 `package.json` 的 `menus.view/title` 中调整按钮顺序，将 dashboard 按钮移到最后，顺序变为：refresh → collapseAll → dashboard（原为 dashboard → refresh → collapseAll）
+- 修复问题2（完成状态）：在 `senatus-parser.js` 的 `parseTopic` 方法中添加逻辑，当阶段为 'action' 且所有任务都已完成时（taskCount > 0 && taskCount === completedCount），将阶段更新为 'completed'
+- 前端支持：在 `dashboard.js` 中添加 'completed' 阶段的图标（fa-check-circle）和名称（"Completed"）
+- 样式支持：在 `dashboard.css` 中添加 `.stage-badge.stage-completed` 样式，使用绿色背景色（#1a7f37）
+- 符合宪法约束：正确实现状态流转逻辑，当所有任务完成后允许进行纠正操作
+
+### D09 - 2025-10-10 10:15:00
+**问题**: 调整按钮顺序后，仪表盘图标仍然位于中间位置，不是通过 package.json 中的 menus 配置顺序控制的。
+
+**结论**:
+- 根本原因：VSCode 的菜单系统中，同一个 `group` 内的多个按钮需要使用 `@` 符号后跟数字来明确指定排序顺序
+- 只调整 JSON 数组顺序不起作用：仅改变数组顺序无法控制实际显示顺序
+- 正确方法：使用 `group: "navigation@N"` 格式，其中 N 是数字，数字越小越靠前
+- 修复方案：
+  - refresh 按钮：`"group": "navigation@1"` （最左侧）
+  - collapseAll 按钮：`"group": "navigation@2"` （中间）
+  - openDashboard 按钮：`"group": "navigation@3"` （最右侧）
+- VSCode 菜单排序规则：在同一组内，按 `@` 后的数字升序排列
+- 符合宪法约束：正确使用 VSCode Extension API 的菜单贡献点配置
+
 ---
 *创建时间: 2025-09-30*
