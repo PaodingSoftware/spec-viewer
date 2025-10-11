@@ -8,12 +8,9 @@ let sidebarProvider = null;
 let fileViewerProvider = null;
 let dashboardProvider = null;
 
-/**
- * Refresh file tree
- */
 async function refreshFileTree() {
     if (sidebarProvider && sidebarProvider.view) {
-        await sidebarProvider.fileFilter.initialize();
+        await sidebarProvider.fileUtils.initialize();
         const tree = await sidebarProvider.getDirectoryTree(sidebarProvider.workspaceFolder);
         sidebarProvider.view.webview.postMessage({
             command: 'refresh',

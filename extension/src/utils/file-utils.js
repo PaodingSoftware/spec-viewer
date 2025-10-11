@@ -1,10 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 
-/**
- * File filtering utility for .specinclude patterns
- */
-class FileFilter {
+class FileUtils {
     constructor(workspaceFolder, includeFile = '.specinclude') {
         this.workspaceFolder = workspaceFolder;
         this.includeFile = includeFile;
@@ -12,9 +9,6 @@ class FileFilter {
         this.useWhitelist = false;
     }
 
-    /**
-     * Load include patterns from .specinclude file
-     */
     async initialize() {
         try {
             const includePath = path.join(this.workspaceFolder, this.includeFile);
@@ -40,11 +34,6 @@ class FileFilter {
         }
     }
 
-    /**
-     * Check if a file path should be included based on patterns
-     * @param {string} filePath - Relative file path
-     * @returns {boolean}
-     */
     isFileIncluded(filePath) {
         if (!this.useWhitelist) {
             return true;
@@ -61,26 +50,47 @@ class FileFilter {
         return false;
     }
 
-    /**
-     * Match a file path against a pattern
-     * @param {string} filePath - Normalized file path
-     * @param {string} pattern - Normalized pattern
-     * @returns {boolean}
-     */
     matchPattern(filePath, pattern) {
         if (pattern.endsWith('/')) {
-            // Directory pattern: matches the directory itself or anything inside it
             const patternBase = pattern.slice(0, -1);
             return filePath === patternBase || filePath.startsWith(pattern);
         } else if (pattern.includes('*')) {
-            // Wildcard pattern
             const regex = new RegExp('^' + pattern.replace(/\*/g, '.*').replace(/\?/g, '.') + '$');
             return regex.test(filePath);
         } else {
-            // Exact file or directory name
             return filePath === pattern || filePath.startsWith(pattern + '/');
         }
     }
+
+    static validatePath(basePath, targetPath, protectedFiles = []) {
+        const resolvedBase = path.resolve(basePath);
+        const resolvedTarget = path.resolve(basePath, targetPath);
+
+        if (!resolvedTarget.startsWith(resolvedBase)) {
+            throw new Error('Invalid path: Directory traversal detected');
+        }
+
+        const relativePath = path.relative(resolvedBase, resolvedTarget);
+        for (const protectedFile of protectedFiles) {
+            if (relativePath === protectedFile || relativePath.startsWith(protectedFile + path.sep)) {
+                throw new Error(`Invalid path: Cannot access protected file ${protectedFile}`);
+            }
+        }
+
+        return resolvedTarget;
+    }
+
+    static debounce(func, delay) {
+        let timeoutId;
+        const debounced = function (...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+        debounced.cancel = function () {
+            clearTimeout(timeoutId);
+        };
+        return debounced;
+    }
 }
 
-module.exports = { FileFilter };
+module.exports = { FileUtils };

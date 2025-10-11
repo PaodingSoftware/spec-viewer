@@ -1,35 +1,23 @@
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs').promises;
-const { FileFilter } = require('../utils/file-filter');
-const { WebviewBase } = require('../utils/webview-base');
+const { FileUtils } = require('../utils/file-utils');
 const { WebviewUtils } = require('../utils/webview-utils');
 const { ResourceUri } = require('../utils/resource-uri');
 
-/**
- * Sidebar webview provider for file tree navigation
- */
-class SidebarProvider extends WebviewBase {
+class SidebarProvider {
     constructor(context, workspaceFolder) {
-        super(context);
+        this.context = context;
         this.workspaceFolder = workspaceFolder;
         this.view = null;
-        this.fileFilter = new FileFilter(workspaceFolder);
+        this.fileUtils = new FileUtils(workspaceFolder);
+        this.webviewUtils = new WebviewUtils(context);
     }
 
-    /**
-     * Initialize the provider
-     */
     async initialize() {
-        await this.fileFilter.initialize();
+        await this.fileUtils.initialize();
     }
 
-    /**
-     * Build directory tree recursively
-     * @param {string} dirPath - Full directory path
-     * @param {string} relativePath - Relative path from workspace
-     * @returns {Promise<Array>} Tree items
-     */
     async getDirectoryTree(dirPath, relativePath = '') {
         const items = [];
 
@@ -40,7 +28,7 @@ class SidebarProvider extends WebviewBase {
                 const entryPath = path.join(relativePath, entry.name);
                 const normalizedPath = entryPath.replace(/\\/g, '/');
 
-                if (!this.fileFilter.isFileIncluded(normalizedPath)) {
+                if (!this.fileUtils.isFileIncluded(normalizedPath)) {
                     continue;
                 }
 
@@ -67,7 +55,6 @@ class SidebarProvider extends WebviewBase {
             console.error(`Error reading directory ${dirPath}:`, error);
         }
 
-        // Sort: directories first, then files, alphabetically
         return items.sort((a, b) => {
             if (a.type !== b.type) {
                 return a.type === 'directory' ? -1 : 1;
@@ -76,10 +63,6 @@ class SidebarProvider extends WebviewBase {
         });
     }
 
-    /**
-     * Resolve the webview view
-     * @param {vscode.WebviewView} webviewView
-     */
     async resolveWebviewView(webviewView) {
         this.view = webviewView;
 
@@ -92,7 +75,6 @@ class SidebarProvider extends WebviewBase {
 
         webviewView.webview.html = await this.getHtmlContent(webviewView.webview);
 
-        // Handle messages from webview
         webviewView.webview.onDidReceiveMessage(async (message) => {
             switch (message.command) {
                 case 'getTree':
@@ -110,17 +92,13 @@ class SidebarProvider extends WebviewBase {
     }
 
 
-    /**
-     * Generate HTML content for sidebar webview
-     * @param {vscode.Webview} webview
-     * @returns {Promise<string>} HTML content
-     */
     async getHtmlContent(webview) {
-        const template = await super.loadTemplate('extension/webview/sidebar/sidebar.html');
+        const template = await this.webviewUtils.loadTemplate('extension/webview/sidebar/sidebar.html');
         const uris = ResourceUri.getSidebarUris(this.context, webview);
 
         return WebviewUtils.renderTemplate(template, {
             fontAwesomeUri: uris.fontAwesome,
+            sharedVariablesUri: uris.sharedVariables,
             styleUri: uris.style,
             fileIconsUri: uris.fileIcons,
             scriptUri: uris.script

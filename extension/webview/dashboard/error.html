@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <link rel="stylesheet" href="{{fontAwesomeUri}}">
+    <style>
+        body {
+            font-family: var(--vscode-font-family);
+            color: var(--vscode-foreground);
+            background-color: var(--vscode-editor-background);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .error-container {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            color: var(--vscode-errorForeground);
+            margin-bottom: 20px;
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--vscode-errorForeground);
+            margin-bottom: 16px;
+        }
+
+        .error-message {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--vscode-foreground);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <h2 class="error-title">Error Loading Dashboard</h2>
+        <p class="error-message">{{message}}</p>
+    </div>
+</body>
+
+</html>

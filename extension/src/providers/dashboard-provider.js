@@ -1,36 +1,28 @@
 const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs').promises;
-const { WebviewBase } = require('../utils/webview-base');
 const { WebviewUtils } = require('../utils/webview-utils');
 const { ResourceUri } = require('../utils/resource-uri');
 const { SenatusParser } = require('../utils/senatus-parser');
 
-/**
- * Dashboard provider for displaying Senatus project overview
- */
-class DashboardProvider extends WebviewBase {
+class DashboardProvider {
     constructor(context, workspaceFolder) {
-        super(context);
+        this.context = context;
         this.workspaceFolder = workspaceFolder;
-        this.panel = null; // Singleton panel reference
+        this.panel = null;
         this.parser = new SenatusParser(workspaceFolder);
         this.watcher = null;
         this.refreshTimeout = null;
-        this.isHtmlLoaded = false; // Track if HTML is loaded
+        this.isHtmlLoaded = false;
+        this.webviewUtils = new WebviewUtils(context);
     }
 
-    /**
-     * Open dashboard (singleton pattern)
-     */
     async openDashboard() {
-        // If panel already exists, reveal it
         if (this.panel) {
             this.panel.reveal(vscode.ViewColumn.One);
             return;
         }
 
-        // Create new panel
         this.panel = vscode.window.createWebviewPanel(
             'senatussDashboard',
             'Senatus Dashboard',
@@ -44,17 +36,14 @@ class DashboardProvider extends WebviewBase {
             }
         );
 
-        // Set custom icon (using built-in icon)
         this.panel.iconPath = {
             light: vscode.Uri.file(path.join(this.context.extensionPath, 'extension/icons/spec-light.svg')),
             dark: vscode.Uri.file(path.join(this.context.extensionPath, 'extension/icons/spec-dark.svg'))
         };
 
-        // Initialize content
         this.isHtmlLoaded = false;
         await this.updatePanelContent();
 
-        // Handle messages from webview
         this.panel.webview.onDidReceiveMessage(
             async (message) => {
                 switch (message.command) {
@@ -94,20 +83,14 @@ class DashboardProvider extends WebviewBase {
         );
     }
 
-    /**
-     * Setup file watcher for specify directory
-     */
     setupFileWatcher() {
-        // Clean up existing watcher
         if (this.watcher) {
             this.watcher.dispose();
         }
 
-        // Create new watcher for specify directory
         const pattern = new vscode.RelativePattern(this.workspaceFolder, 'specify/**/*');
         this.watcher = vscode.workspace.createFileSystemWatcher(pattern);
 
-        // Debounced refresh (1000ms)
         const debouncedRefresh = () => {
             if (this.refreshTimeout) {
                 clearTimeout(this.refreshTimeout);
@@ -126,14 +109,10 @@ class DashboardProvider extends WebviewBase {
         this.context.subscriptions.push(this.watcher);
     }
 
-    /**
-     * Update panel content with latest data
-     */
     async updatePanelContent() {
         if (!this.panel) return;
 
         try {
-            // Parse Senatus data
             const data = await this.parser.parseAll();
 
             // Send update message to webview instead of replacing HTML
@@ -155,62 +134,30 @@ class DashboardProvider extends WebviewBase {
         }
     }
 
-    /**
-     * Generate dashboard HTML content
-     * @param {Object} data - Parsed Senatus data
-     * @returns {Promise<string>} HTML content
-     */
     async getDashboardHtml(data) {
-        const template = await super.loadTemplate('extension/webview/dashboard/dashboard.html');
+        const template = await this.webviewUtils.loadTemplate('extension/webview/dashboard/dashboard.html');
         const uris = ResourceUri.getDashboardUris(this.context, this.panel.webview);
 
-        // Prepare data for template
         const dataJson = JSON.stringify(data);
 
         return WebviewUtils.renderTemplate(template, {
             fontAwesomeUri: uris.fontAwesome,
+            sharedVariablesUri: uris.sharedVariables,
             styleUri: uris.style,
             scriptUri: uris.script,
             dataJson: dataJson
         });
     }
 
-    /**
-     * Generate error HTML content
-     * @param {string} message - Error message
-     * @returns {Promise<string>} HTML content
-     */
     async getErrorHtml(message) {
-        return `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Error</title>
-                <style>
-                    body {
-                        font-family: var(--vscode-font-family);
-                        color: var(--vscode-foreground);
-                        background-color: var(--vscode-editor-background);
-                        padding: 20px;
-                    }
-                    .error {
-                        color: var(--vscode-errorForeground);
-                    }
-                </style>
-            </head>
-            <body>
-                <h2 class="error">Error Loading Dashboard</h2>
-                <p>${WebviewUtils.escapeHtml(message)}</p>
-            </body>
-            </html>
-        `;
+        const template = await this.webviewUtils.loadTemplate('extension/webview/dashboard/error.html');
+        const uris = ResourceUri.getDashboardUris(this.context, this.panel.webview);
+        return WebviewUtils.renderTemplate(template, {
+            fontAwesomeUri: uris.fontAwesome,
+            message: WebviewUtils.escapeHtml(message)
+        });
     }
 
-    /**
-     * Clean up resources
-     */
     cleanupResources() {
         if (this.watcher) {
             this.watcher.dispose();
@@ -245,16 +192,10 @@ class DashboardProvider extends WebviewBase {
         return topicPath;
     }
 
-    /**
-     * Delete current topic
-     * @param {string} topicDirName - Topic directory name
-     */
     async deleteTopic(topicDirName) {
         try {
-            // Validate path
             const topicPath = this.validateTopicPath(topicDirName);
 
-            // Get current topic to verify it's the latest
             const data = await this.parser.parseAll();
             if (!data.currentTopic || data.currentTopic.dirName !== topicDirName) {
                 vscode.window.showWarningMessage('Only the current topic can be deleted.');
@@ -286,17 +227,11 @@ class DashboardProvider extends WebviewBase {
         }
     }
 
-    /**
-     * Delete research report
-     * @param {string} topicDirName - Topic directory name
-     */
     async deleteResearch(topicDirName) {
         try {
-            // Validate path
             const topicPath = this.validateTopicPath(topicDirName);
             const researchPath = path.join(topicPath, 'research.md');
 
-            // Get current topic to verify it's the latest
             const data = await this.parser.parseAll();
             if (!data.currentTopic || data.currentTopic.dirName !== topicDirName) {
                 vscode.window.showWarningMessage('Only the current topic research can be deleted.');
@@ -336,16 +271,10 @@ class DashboardProvider extends WebviewBase {
         }
     }
 
-    /**
-     * Rollback to discuss stage by removing plan and implementation
-     * @param {string} topicDirName - Topic directory name
-     */
     async rollbackToDiscuss(topicDirName) {
         try {
-            // Validate path
             const topicPath = this.validateTopicPath(topicDirName);
 
-            // Get current topic to verify it's the latest
             const data = await this.parser.parseAll();
             if (!data.currentTopic || data.currentTopic.dirName !== topicDirName) {
                 vscode.window.showWarningMessage('Only the current topic can be rolled back.');

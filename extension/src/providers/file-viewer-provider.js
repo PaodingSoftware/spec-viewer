@@ -2,40 +2,30 @@ const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs').promises;
 const { marked } = require('marked');
-const { WebviewBase } = require('../utils/webview-base');
 const { WebviewUtils } = require('../utils/webview-utils');
 const { ResourceUri } = require('../utils/resource-uri');
 
-/**
- * File viewer provider for displaying markdown and other files
- */
-class FileViewerProvider extends WebviewBase {
+class FileViewerProvider {
     constructor(context, workspaceFolder) {
-        super(context);
+        this.context = context;
         this.workspaceFolder = workspaceFolder;
-        this.panels = new Map(); // filePath -> panel
-        this.panelStates = new Map(); // filePath -> { viewMode }
+        this.panels = new Map();
+        this.panelStates = new Map();
+        this.webviewUtils = new WebviewUtils(context);
 
-        // Listen for theme changes
         vscode.window.onDidChangeActiveColorTheme(() => {
             this.onThemeChanged();
         }, null, context.subscriptions);
     }
 
 
-    /**
-     * Open a file in a webview panel
-     * @param {string} filePath - Relative file path
-     */
     async openFile(filePath) {
-        // Check if panel already exists
         if (this.panels.has(filePath)) {
             const panel = this.panels.get(filePath);
             panel.reveal(vscode.ViewColumn.One);
             return;
         }
 
-        // Create new panel
         const fileName = path.basename(filePath);
         const panel = vscode.window.createWebviewPanel(
             'specViewerFile',
@@ -121,19 +111,18 @@ class FileViewerProvider extends WebviewBase {
     }
 
 
-    /**
-     * Generate markdown webview content
-     */
     async getMarkdownWebviewContent(panel, rawContent, htmlContent, viewMode = 'preview') {
         const highlightTheme = this.getHighlightTheme();
         const uris = ResourceUri.getViewerUris(this.context, panel.webview, highlightTheme);
-        const htmlTemplate = await super.loadTemplate('extension/webview/viewer/viewer.html');
+        const htmlTemplate = await this.webviewUtils.loadTemplate('extension/webview/viewer/viewer.html');
 
         return WebviewUtils.renderTemplate(htmlTemplate, {
             fontAwesomeUri: uris.fontAwesome,
+            sharedVariablesUri: uris.sharedVariables,
             styleUri: uris.style,
             highlightThemeUri: uris.highlightTheme,
             highlightJsUri: uris.highlightJs,
+            sharedUtilsUri: uris.sharedUtils,
             scriptUri: uris.script,
             viewMode: viewMode,
             rawContentJson: JSON.stringify(rawContent),
@@ -144,22 +133,16 @@ class FileViewerProvider extends WebviewBase {
         });
     }
 
-    /**
-     * Generate text file webview content
-     */
     async getTextWebviewContent(content, fileName) {
-        const template = await super.loadTemplate('extension/webview/viewer/text.html');
+        const template = await this.webviewUtils.loadTemplate('extension/webview/viewer/text.html');
         return WebviewUtils.renderTemplate(template, {
             fileName: fileName,
             content: WebviewUtils.escapeHtml(content)
         });
     }
 
-    /**
-     * Generate error webview content
-     */
     async getErrorWebviewContent(message) {
-        const template = await super.loadTemplate('extension/webview/viewer/error.html');
+        const template = await this.webviewUtils.loadTemplate('extension/webview/viewer/error.html');
         return WebviewUtils.renderTemplate(template, {
             message: WebviewUtils.escapeHtml(message)
         });
