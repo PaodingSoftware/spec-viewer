@@ -511,3 +511,51 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background-color: var(--vscode-scrollbarSlider-hoverBackground);
 }
+
+/* Context Menu */
+.context-menu {
+    position: fixed;
+    background-color: var(--vscode-menu-background);
+    border: 1px solid var(--vscode-menu-border);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: 4px 0;
+    z-index: 1000;
+    min-width: 200px;
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--vscode-menu-foreground);
+    font-size: 13px;
+    transition: background-color 0.1s;
+}
+
+.context-menu-item:hover {
+    background-color: var(--vscode-menu-selectionBackground);
+    color: var(--vscode-menu-selectionForeground);
+}
+
+.context-menu-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.context-menu-item.danger {
+    color: #dc3545;
+}
+
+.context-menu-item.danger:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.context-menu-separator {
+    height: 1px;
+    background-color: var(--vscode-menu-separatorBackground);
+    margin: 4px 0;
+}

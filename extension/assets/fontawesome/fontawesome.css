@@ -195,6 +195,14 @@
   content: "\f0e7";
 }
 
+.fa-trash-alt::before {
+  content: "\f2ed";
+}
+
+.fa-undo::before {
+  content: "\f0e2";
+}
+
 /* Brand Icons */
 .fa-markdown::before {
   content: "\f60f";

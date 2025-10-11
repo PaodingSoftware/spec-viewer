@@ -2,6 +2,7 @@
     const vscode = acquireVsCodeApi();
 
     let dashboardData = null;
+    let contextMenu = null;
 
     // Initialize
     window.addEventListener('load', () => {
@@ -37,6 +38,11 @@
                 showLoading();
             });
         }
+
+        // Close context menu on click outside
+        document.addEventListener('click', () => {
+            closeContextMenu();
+        });
     }
 
     /**
@@ -90,6 +96,13 @@
     function renderCurrentTopicCard(topic) {
         const card = document.createElement('div');
         card.className = 'current-topic-card';
+
+        // Add context menu handler
+        card.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showContextMenu(e.clientX, e.clientY, topic);
+        });
 
         const header = document.createElement('div');
         header.className = 'current-topic-header';
@@ -449,6 +462,129 @@
     function showLoading() {
         const contentContainer = document.getElementById('dashboard-content');
         contentContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Refreshing...</div>';
+    }
+
+    /**
+     * Show context menu
+     */
+    function showContextMenu(x, y, topic) {
+        closeContextMenu();
+
+        contextMenu = document.createElement('div');
+        contextMenu.className = 'context-menu';
+
+        // Delete topic option
+        const deleteTopicItem = createContextMenuItem(
+            'fa-trash-alt',
+            'Delete Topic',
+            'danger',
+            () => {
+                vscode.postMessage({
+                    command: 'deleteTopic',
+                    topicDirName: topic.dirName
+                });
+                closeContextMenu();
+            }
+        );
+        contextMenu.appendChild(deleteTopicItem);
+
+        // Delete research option (only if research exists)
+        if (topic.hasResearch) {
+            const separator = document.createElement('div');
+            separator.className = 'context-menu-separator';
+            contextMenu.appendChild(separator);
+
+            const deleteResearchItem = createContextMenuItem(
+                'fa-trash-alt',
+                'Delete Research Report',
+                'danger',
+                () => {
+                    vscode.postMessage({
+                        command: 'deleteResearch',
+                        topicDirName: topic.dirName
+                    });
+                    closeContextMenu();
+                }
+            );
+            contextMenu.appendChild(deleteResearchItem);
+        }
+
+        // Rollback to discuss option (only if in plan, action, or completed stage)
+        const allowedStages = ['plan', 'action', 'completed'];
+        if (allowedStages.includes(topic.stage)) {
+            const separator = document.createElement('div');
+            separator.className = 'context-menu-separator';
+            contextMenu.appendChild(separator);
+
+            const rollbackItem = createContextMenuItem(
+                'fa-undo',
+                'Rollback to Discussion',
+                '',
+                () => {
+                    vscode.postMessage({
+                        command: 'rollbackToDiscuss',
+                        topicDirName: topic.dirName
+                    });
+                    closeContextMenu();
+                }
+            );
+            contextMenu.appendChild(rollbackItem);
+        }
+
+        // Only show menu if there are items
+        if (contextMenu.children.length > 0) {
+            document.body.appendChild(contextMenu);
+
+            // Position the menu
+            contextMenu.style.left = x + 'px';
+            contextMenu.style.top = y + 'px';
+
+            // Adjust if menu goes off screen
+            const rect = contextMenu.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                contextMenu.style.left = (x - rect.width) + 'px';
+            }
+            if (rect.bottom > window.innerHeight) {
+                contextMenu.style.top = (y - rect.height) + 'px';
+            }
+        }
+    }
+
+    /**
+     * Create context menu item
+     */
+    function createContextMenuItem(iconClass, text, className, onClick) {
+        const item = document.createElement('div');
+        item.className = 'context-menu-item';
+        if (className) {
+            item.classList.add(className);
+        }
+
+        const icon = document.createElement('i');
+        icon.className = `fas ${iconClass}`;
+
+        const label = document.createElement('span');
+        label.textContent = text;
+
+        item.appendChild(icon);
+        item.appendChild(label);
+
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            onClick();
+        });
+
+        return item;
+    }
+
+    /**
+     * Close context menu
+     */
+    function closeContextMenu() {
+        if (contextMenu) {
+            contextMenu.remove();
+            contextMenu = null;
+        }
     }
 
 })();
