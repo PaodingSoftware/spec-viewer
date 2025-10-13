@@ -529,6 +529,21 @@
                 }
             );
             contextMenu.appendChild(rollbackItem);
+
+            // Rollback plan only option (same stages as rollback to discuss)
+            const rollbackPlanItem = createContextMenuItem(
+                'fa-undo',
+                'Rollback Plan Only',
+                '',
+                () => {
+                    vscode.postMessage({
+                        command: 'rollbackPlanOnly',
+                        topicDirName: topic.dirName
+                    });
+                    closeContextMenu();
+                }
+            );
+            contextMenu.appendChild(rollbackPlanItem);
         }
 
         // Only show menu if there are items

@@ -62,6 +62,9 @@ class DashboardProvider {
                     case 'rollbackToDiscuss':
                         await this.rollbackToDiscuss(message.topicDirName);
                         break;
+                    case 'rollbackPlanOnly':
+                        await this.rollbackPlanOnly(message.topicDirName);
+                        break;
                 }
             },
             null,
@@ -323,6 +326,57 @@ class DashboardProvider {
         } catch (error) {
             console.error('Error rolling back:', error);
             vscode.window.showErrorMessage(`Failed to rollback: ${error.message}`);
+        }
+    }
+
+    async rollbackPlanOnly(topicDirName) {
+        try {
+            const topicPath = this.validateTopicPath(topicDirName);
+
+            const data = await this.parser.parseAll();
+            if (!data.currentTopic || data.currentTopic.dirName !== topicDirName) {
+                vscode.window.showWarningMessage('Only the current topic can be rolled back.');
+                return;
+            }
+
+            // Check if topic is in a stage that allows this operation
+            const allowedStages = ['plan', 'action', 'completed'];
+            if (!allowedStages.includes(data.currentTopic.stage)) {
+                vscode.window.showWarningMessage(`Cannot rollback plan from ${data.currentTopic.stage} stage.`);
+                return;
+            }
+
+            // Confirm rollback
+            const choice = await vscode.window.showWarningMessage(
+                'Rollback plan only?\n\nThis will delete:\n• plan.md (action plan)\n\nImplementation records, discussion records and research report will be preserved.\n\nThis action cannot be undone.',
+                { modal: true },
+                'Rollback Plan',
+                'Cancel'
+            );
+
+            if (choice !== 'Rollback Plan') {
+                return;
+            }
+
+            // Delete plan.md if exists
+            const planPath = path.join(topicPath, 'plan.md');
+            try {
+                await fs.unlink(planPath);
+            } catch (error) {
+                if (error.code === 'ENOENT') {
+                    vscode.window.showWarningMessage('plan.md does not exist');
+                    return;
+                }
+                throw error;
+            }
+
+            vscode.window.showInformationMessage('Plan rolled back successfully');
+
+            // Refresh dashboard
+            await this.updatePanelContent();
+        } catch (error) {
+            console.error('Error rolling back plan:', error);
+            vscode.window.showErrorMessage(`Failed to rollback plan: ${error.message}`);
         }
     }
 }
