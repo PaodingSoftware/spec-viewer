@@ -153,7 +153,7 @@ class SenatusParser {
      */
     determineStage(files, discussionCount = 0) {
         // Check implementation directory for action stage
-        if (files.has('implementation')) {
+        if (files.has('implementation') && files.has('plan.md')) {
             return 'action';
         }
         if (files.has('plan.md')) {
