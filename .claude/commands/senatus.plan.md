@@ -54,4 +54,3 @@ argument-hint: [注意事项]
 ## 输出结果
 - 生成的任务项数量
 - 建议运行 `/senatus.implement` 开始实施
-````
