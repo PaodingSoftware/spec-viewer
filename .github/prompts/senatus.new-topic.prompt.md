@@ -1,6 +1,5 @@
 ---
 description: 创建一个新的讨论主题
-argument-hint: [主题描述]
 ---
 
 **用户输入**: $ARGUMENTS
@@ -31,4 +30,4 @@ argument-hint: [主题描述]
 
 ## 输出结果
 - 创建的主题目录路径
-- 建议运行 `/research` 进行项目研究
+- 建议运行 `/senatus.research` 进行项目研究

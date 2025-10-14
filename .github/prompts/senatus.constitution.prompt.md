@@ -17,7 +17,7 @@ description: 创建项目的全局约束宪法文件
    - 常见分类：技术约束、质量约束、安全约束、业务约束
 
 4. **创建宪法文件**:
-   - 读取模板文件 `.specify/templates/constitution-template.md`
+   - 读取模板文件 `.specify/constitution-template.md`
    - 替换模板占位符：
      * `{{PROJECT_NAME}}` → 项目名称
      * `{{CONSTITUTION_VERSION}}` → v1.0.0

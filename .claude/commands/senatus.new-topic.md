@@ -1,5 +1,6 @@
 ---
 description: 创建一个新的讨论主题
+argument-hint: [主题描述]
 ---
 
 **用户输入**: $ARGUMENTS
@@ -21,7 +22,7 @@ description: 创建一个新的讨论主题
 
 4. **创建讨论文件**:
    - 从用户输入中提取主题名和主题描述
-   - 读取模板文件 `.specify/templates/discuss-template.md`
+   - 读取模板文件 `.specify/discuss-template.md`
    - 替换模板占位符：
      * `{{TOPIC_NAME}}` → 主题名
      * `{{TOPIC_DESCRIPTION}}` → 主题描述
@@ -30,4 +31,4 @@ description: 创建一个新的讨论主题
 
 ## 输出结果
 - 创建的主题目录路径
-- 建议运行 `/research` 进行项目研究
+- 建议运行 `/senatus.research` 进行项目研究

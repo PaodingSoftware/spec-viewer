@@ -11,7 +11,7 @@ description: 对当前主题进行项目源码研究并更新研究报告
 2. **获取当前主题**:
    - 扫描 `specify/` 目录找到最新主题目录（按序号排序）
    - 读取最新主题目录下的 `discuss.md` 文件了解内容
-   - 如无主题目录则提示运行 `/new-topic` 并结束命令
+   - 如无主题目录则提示运行 `/senatus.new-topic` 并结束命令
 
 3. **检查现有研究**:
    - 检查 `specify/{当前主题目录}/research.md` 是否存在
@@ -37,4 +37,4 @@ description: 对当前主题进行项目源码研究并更新研究报告
 
 ## 输出结果
 - 研究报告的主要发现
-- 建议运行 `/discuss` 或 `/inspire` 进行主题讨论
+- 建议运行 `/senatus.discuss` 或 `/senatus.inspire` 进行主题讨论

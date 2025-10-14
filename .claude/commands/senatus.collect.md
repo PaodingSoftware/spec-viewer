@@ -1,5 +1,5 @@
 ---
-description: 收集用户手动修改的代码变更并记录到行动计划
+description: 收集用户手动修改的代码变更并记录到任务计划
 ---
 
 ## 执行流程
@@ -15,11 +15,11 @@ description: 收集用户手动修改的代码变更并记录到行动计划
 3. **获取当前主题**:
    - 扫描 `specify/` 目录找到最新主题目录（按序号排序）
    - 读取最新主题目录下的 `discuss.md` 文件了解内容
-   - 如无主题目录则提示运行 `/new-topic` 并结束命令
+   - 如无主题目录则提示运行 `/senatus.new-topic` 并结束命令
 
 4. **读取研究基础**:
    - 读取 `specify/{当前主题目录}/research.md` 文件（如存在）
-   - 如研究文件不存在则建议先运行 `/research`
+   - 如研究文件不存在则建议先运行 `/senatus.research`
    - 基于现有研究结果分析项目现状
 
 5. **分析代码变更**:
@@ -29,29 +29,29 @@ description: 收集用户手动修改的代码变更并记录到行动计划
    - 识别潜在的风险或需要注意的事项
 
 6. **生成变更描述**:
-   - 基于代码变更自动生成描述
-   - 描述应清晰说明变更的目的和内容
+   - 基于代码变更自动生成简洁的描述
+   - 描述应概括变更的核心目的
 
-7. **更新行动计划**:
+7. **更新任务计划**:
    - 读取 `specify/{当前主题目录}/plan.md` 文件
-   - 如行动计划文件不存在则提示运行 `/plan` 并结束命令
-   - 确定下一个行动编号（A01, A02, A03...）
-   - 在行动清单部分添加新的行动项：
+   - 如任务计划文件不存在则提示运行 `/senatus.plan` 并结束命令
+   - 确定下一个任务编号（T01, T02, T03...）
+   - 在任务清单部分添加新的任务项：
      ```markdown
-     A01. [✅已完成] 变更描述
+     T01. [✅已完成] 变更描述
      ```
 
 8. **生成实现记录**:
    - 在 `specify/{当前主题目录}/` 下创建 `implementation/` 目录（如不存在）
-   - 读取模板文件 `.specify/templates/implementation-template.md`
+   - 读取模板文件 `.specify/implementation-template.md`
    - 替换模板占位符：
-     - `{{ACTION_ID}}` → 行动编号
-     - `{{ACTION_DESCRIPTION}}` → 变更描述
+     - `{{TASK_ID}}` → 任务编号
+     - `{{TASK_DESCRIPTION}}` → 变更描述
      - `{{IMPLEMENTATION_DETAILS}}` → 详细变更内容
      - `{{CURRENT_DATE}}` → 当前日期（YYYY-MM-DD）
-   - 生成目标文件 `specify/{当前主题目录}/implementation/{ACTION_ID}.md`（如文件已存在则覆盖）
+   - 生成目标文件 `specify/{当前主题目录}/implementation/{TASK_ID}.md`（如文件已存在则覆盖）
 
 ## 输出结果
 - Git staged 变更统计（文件数、新增行数、删除行数）
 - 生成的变更描述
-- 新增的行动项编号（已完成状态）
+- 新增的任务项编号（已完成状态）
