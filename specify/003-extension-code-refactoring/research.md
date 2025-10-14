@@ -198,7 +198,7 @@ DashboardProvider::openDashboard()
   │   │   ├─ scanTopics() - 扫描 specify/ 目录
   │   │   ├─ parseTopic() - 解析每个主题
   │   │   │   ├─ parseDiscuss() - 提取讨论记录 (D01, D02...)
-  │   │   │   ├─ parsePlan() - 提取任务列表 (A01, A02...)
+  │   │   │   ├─ parsePlan() - 提取任务列表 (T01, T02...)
   │   │   │   ├─ determineStage() - 判断阶段
   │   │   │   └─ calculateCompletionRate() - 计算进度
   │   │   └─ getCurrentTopic() - 获取最新主题
@@ -335,7 +335,7 @@ demo/**            # 递归通配符
 
 // parsePlan() - 提取任务列表
 正则: /^(A\d+)\. \[(⏳|✅)[^\]]*\] (.+?)$/gm
-提取: A01, A02... 编号、状态、描述
+提取: T01, T02... 编号、状态、描述
 
 // determineStage() - 阶段判断逻辑
 implementation/ 存在 → action

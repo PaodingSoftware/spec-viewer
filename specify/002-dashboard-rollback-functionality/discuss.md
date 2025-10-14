@@ -40,9 +40,9 @@
 
 **结论**:
 1. **显示条件**：回滚按钮在当前主题处于 `plan` 或 `action` 阶段时显示，处于 `completed` 阶段时也允许回滚，处于 `discuss` 或 `new-topic` 阶段时不显示
-2. **删除范围**：删除 `plan.md` 文件和整个 `implementation/` 目录（包括所有 A01.md, A02.md... 文件），保留 `discuss.md` 和 `research.md`（如果存在）
+2. **删除范围**：删除 `plan.md` 文件和整个 `implementation/` 目录（包括所有 T01.md, T02.md... 文件），保留 `discuss.md` 和 `research.md`（如果存在）
 3. **UI 位置**：使用右键菜单（选项 C），在当前主题卡片上右键时显示"回滚到讨论阶段"选项，与"删除研究报告"统一在右键菜单中
-4. **确认对话框**：使用清晰的警告措辞："确定要回滚到讨论阶段吗？此操作将删除 plan.md（行动计划）和 implementation/ 目录（所有实现记录）。此操作无法撤销，但会保留讨论记录和研究报告。"
+4. **确认对话框**：使用清晰的警告措辞："确定要回滚到讨论阶段吗？此操作将删除 plan.md（任务计划）和 implementation/ 目录（所有实现记录）。此操作无法撤销，但会保留讨论记录和研究报告。"
 5. **阶段判断**：回滚后阶段自动根据文件判断，如果有讨论记录则为 `discuss`，如果没有讨论记录（`discussionCount === 0`）则回到 `new-topic`，这个行为符合预期
 6. **技术实现**：新增消息命令 `rollbackToDiscuss`，使用 `fs.unlink()` 删除 `plan.md`，使用 `fs.rm(..., { recursive: true, force: true })` 删除 `implementation/` 目录
 

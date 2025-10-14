@@ -81,10 +81,10 @@ specify/
 ├── 001-vscode-dashboard-interface/           # 主题目录（三位数序号-主题名）
 │   ├── discuss.md                            # 讨论记录
 │   ├── research.md                           # 研究报告
-│   ├── plan.md                               # 行动计划
+│   ├── plan.md                               # 任务计划
 │   └── implementation/                       # 实现记录目录
-│       ├── A01.md
-│       ├── A02.md
+│       ├── T01.md
+│       ├── T02.md
 │       └── ...
 └── 002-dashboard-rollback-functionality/     # 当前主题
     └── discuss.md
@@ -124,7 +124,7 @@ extension/
 ### Senatus 主题阶段流程
 1. **new-topic**: 主题刚创建，只有 `discuss.md` 文件，无讨论记录
 2. **discuss**: 开始讨论，`discuss.md` 中有讨论记录（D01, D02...）
-3. **plan**: 完成讨论，创建 `plan.md` 文件，规划行动任务（A01, A02...）
+3. **plan**: 完成讨论，创建 `plan.md` 文件，规划任务任务（T01, T02...）
 4. **action**: 开始执行，创建 `implementation/` 目录，包含实现记录
 5. **completed**: 所有任务完成（`taskCount === completedCount`）
 
@@ -188,7 +188,7 @@ Extension 处理:
 3. **重新研究**: 删除 `research.md` 文件
 4. **删除 topic**: 删除整个主题目录（如 `001-vscode-dashboard-interface/`）
 5. **回滚 action**: 删除 `implementation/` 目录，回到 plan 阶段
-6. **删除指定的任务**: 从 `plan.md` 中删除特定的 A01、A02 等任务
+6. **删除指定的任务**: 从 `plan.md` 中删除特定的 T01、T02 等任务
 
 #### 当前系统的数据流向
 - **只读操作**: 当前系统只有读取和解析功能（`fs.readFile`, `fs.readdir`）
