@@ -216,19 +216,25 @@ class SenatusParser {
             // Remove HTML comments to avoid matching example patterns
             content = content.replace(/<!--[\s\S]*?-->/g, '');
 
-            // Use regex to extract tasks: A01. [⏳待执行] or A01. [✅已完成]
-            const taskRegex = /^(A\d+)\. \[(⏳|✅)[^\]]*\] (.+?)$/gm;
+            // Use regex to extract tasks: T01. [⏳待执行] or T01. [🔄进行中] or T01. [✅已完成]
+            const taskRegex = /^(T\d+)\. \[(⏳|🔄|✅)[^\]]*\] (.+?)$/gm;
             const tasks = [];
             let completedCount = 0;
             let match;
 
             while ((match = taskRegex.exec(content)) !== null) {
-                const isCompleted = match[2] === '✅';
-                if (isCompleted) completedCount++;
+                const statusIcon = match[2];
+                let status = 'pending';
+                if (statusIcon === '✅') {
+                    status = 'completed';
+                    completedCount++;
+                } else if (statusIcon === '🔄') {
+                    status = 'in-progress';
+                }
 
                 tasks.push({
                     id: match[1],
-                    status: isCompleted ? 'completed' : 'pending',
+                    status: status,
                     description: match[3].trim()
                 });
             }
