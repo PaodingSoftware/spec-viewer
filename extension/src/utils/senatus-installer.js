@@ -37,7 +37,7 @@ class SenatusInstaller {
         try {
             // Confirm installation
             const choice = await vscode.window.showInformationMessage(
-                'Install Senatus Framework? This will copy Claude commands and Specify templates to your project.',
+                'Install Senatus Framework? This will copy Claude commands, GitHub Copilot prompts, Cursor commands, and Specify templates to your project.',
                 { modal: true },
                 'Install'
             );
@@ -49,10 +49,12 @@ class SenatusInstaller {
             // Create target directories
             const commandsDir = path.join(workspaceFolder, '.claude', 'commands');
             const promptsDir = path.join(workspaceFolder, '.github', 'prompts');
+            const cursorCommandsDir = path.join(workspaceFolder, '.cursor', 'commands');
             const specifyDir = path.join(workspaceFolder, '.specify');
 
             await fs.mkdir(commandsDir, { recursive: true });
             await fs.mkdir(promptsDir, { recursive: true });
+            await fs.mkdir(cursorCommandsDir, { recursive: true });
             await fs.mkdir(specifyDir, { recursive: true });
 
             // Copy claude commands
@@ -62,6 +64,9 @@ class SenatusInstaller {
             // Copy copilot prompts
             const sourcePromptsDir = path.join(this.senatusPath, '.github', 'prompts');
             await this.copyDirectory(sourcePromptsDir, promptsDir);
+
+            // Copy and rename prompt files for Cursor commands
+            await this.copyCursorCommands(sourcePromptsDir, cursorCommandsDir);
 
             // Copy specify templates
             const sourceSpecifyDir = path.join(this.senatusPath, '.specify');
@@ -102,6 +107,29 @@ class SenatusInstaller {
             } else {
                 await fs.copyFile(sourcePath, targetPath);
             }
+        }
+    }
+
+    /**
+     * Copy and rename prompt files for Cursor commands
+     * @param {string} sourcePromptsDir - Source prompts directory (.github/prompts)
+     * @param {string} targetCommandsDir - Target Cursor commands directory (.cursor/commands)
+     */
+    async copyCursorCommands(sourcePromptsDir, targetCommandsDir) {
+        try {
+            const entries = await fs.readdir(sourcePromptsDir, { withFileTypes: true });
+
+            for (const entry of entries) {
+                if (entry.isFile() && entry.name.endsWith('.prompt.md')) {
+                    const sourcePath = path.join(sourcePromptsDir, entry.name);
+                    // Remove '.prompt' from filename (e.g., 'senatus.discuss.prompt.md' -> 'senatus.discuss.md')
+                    const newName = entry.name.replace('.prompt.md', '.md');
+                    const targetPath = path.join(targetCommandsDir, newName);
+                    await fs.copyFile(sourcePath, targetPath);
+                }
+            }
+        } catch (error) {
+            console.warn('Failed to copy Cursor commands:', error.message);
         }
     }
 }

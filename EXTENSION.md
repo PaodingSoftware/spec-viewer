@@ -1,6 +1,14 @@
 # Spec Viewer - VS Code Extension
 
-The Spec Viewer VS Code extension allows you to view and manage specification documents directly within VS Code.
+The Spec Viewer VS Code extension allows you to view and manage specification documents directly within VS Code and Cursor IDE.
+
+## Compatibility
+
+This extension is compatible with:
+- **VS Code** - Modern versions with Webview API support
+- **Cursor IDE** - Fully compatible with Cursor's VS Code fork
+
+The extension uses standard VS Code Extension APIs and works seamlessly in both environments.
 
 ## Features
 
@@ -13,7 +21,9 @@ The Spec Viewer VS Code extension allows you to view and manage specification do
 
 ## Installation
 
-### Method 1: Using npm Script (Recommended)
+### For VS Code
+
+#### Method 1: Using npm Script (Recommended)
 
 ```bash
 # Clone the repository
@@ -27,7 +37,7 @@ npm install
 npm run install-extension
 ```
 
-### Method 2: Manual Installation
+#### Method 2: Manual Installation
 
 1. Clone the repository and install dependencies:
 ```bash
@@ -46,6 +56,44 @@ npm run package
    - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) to open the Command Palette
    - Type "Install from VSIX" and select `Extensions: Install from VSIX...`
    - Select the generated `spec-viewer-1.0.0.vsix` file
+
+### For Cursor IDE
+
+#### Method 1: Using npm Script (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/PaodingSoftware/spec-viewer.git
+cd spec-viewer
+
+# Install dependencies
+npm install
+
+# Package and install the extension to Cursor
+npm run install-extension-cursor
+```
+
+#### Method 2: Manual Installation
+
+1. Clone the repository and install dependencies:
+```bash
+git clone https://github.com/PaodingSoftware/spec-viewer.git
+cd spec-viewer
+npm install
+```
+
+2. Package the extension:
+```bash
+npm run package
+```
+
+3. Install in Cursor:
+   - Open Cursor IDE
+   - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on macOS) to open the Command Palette
+   - Type "Install from VSIX" and select `Extensions: Install from VSIX...`
+   - Select the generated `spec-viewer-1.0.0.vsix` file
+
+**Note**: Cursor IDE is fully compatible with VS Code extensions, so all features work identically in both environments.
 
 ## Usage Guide
 
@@ -101,6 +149,14 @@ Automatically install the Senatus specification framework:
 2. Type "Spec Viewer: Install Senatus Framework"
 3. Select the command
 4. The framework will be automatically installed to your workspace
+
+**What Gets Installed:**
+- `.claude/commands/` - Claude AI custom commands
+- `.github/prompts/` - GitHub Copilot prompt files
+- `.cursor/commands/` - Cursor IDE custom commands (auto-generated from GitHub Copilot prompts)
+- `.specify/` - Senatus specification templates
+
+This ensures compatibility with multiple AI coding assistants (Claude AI, GitHub Copilot, and Cursor) while maintaining a single source of truth for command definitions.
 
 ### Available Commands
 

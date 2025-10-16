@@ -8,7 +8,7 @@
     "spec-viewer": "bin/spec-viewer.js"
   },
   "engines": {
-    "vscode": "^1.104.0"
+    "vscode": "^1.85.0"
   },
   "categories": [
     "Other"
@@ -95,7 +95,8 @@
     "demo": "node bin/spec-viewer.js demo --port 3003",
     "install-cli": "npm install -g .",
     "package": "vsce package",
-    "install-extension": "vsce package && code --install-extension spec-viewer-1.0.0.vsix"
+    "install-extension": "vsce package && code --install-extension spec-viewer-1.0.0.vsix",
+    "install-extension-cursor": "vsce package && cursor --install-extension spec-viewer-1.0.0.vsix"
   },
   "keywords": [
     "spec-kit",
@@ -117,7 +118,7 @@
     "socket.io": "^4.7.2"
   },
   "devDependencies": {
-    "@types/vscode": "^1.104.0",
+    "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.6.2"
   },
   "repository": {
