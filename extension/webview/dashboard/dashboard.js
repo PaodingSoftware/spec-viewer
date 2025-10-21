@@ -133,8 +133,27 @@
             researchIndicator.style.cursor = 'pointer';
         }
 
+        // Add knowledge summary indicator
+        const knowledgeIndicator = document.createElement('span');
+        knowledgeIndicator.className = `knowledge-indicator ${topic.hasKnowledge ? 'completed' : 'pending'}`;
+        knowledgeIndicator.title = topic.hasKnowledge ? 'Knowledge summary created' : 'No knowledge summary';
+        knowledgeIndicator.innerHTML = `<i class="fas fa-book"></i> ${topic.hasKnowledge ? 'Summarized' : 'Not Summarized'}`;
+
+        // Click handler for knowledge indicator - open knowledge file
+        if (topic.hasKnowledge) {
+            knowledgeIndicator.addEventListener('click', () => {
+                const filePath = `knowledge/${topic.dirName}.md`;
+                vscode.postMessage({
+                    command: 'openFile',
+                    path: filePath
+                });
+            });
+            knowledgeIndicator.style.cursor = 'pointer';
+        }
+
         header.appendChild(title);
         header.appendChild(researchIndicator);
+        header.appendChild(knowledgeIndicator);
         header.appendChild(stageBadge);
 
         // Progress bar
@@ -314,10 +333,29 @@
             researchIndicator.style.cursor = 'pointer';
         }
 
+        const knowledgeIndicator = document.createElement('span');
+        knowledgeIndicator.className = `knowledge-indicator ${topic.hasKnowledge ? 'completed' : 'pending'}`;
+        knowledgeIndicator.title = topic.hasKnowledge ? 'Knowledge summary created' : 'No knowledge summary';
+        knowledgeIndicator.innerHTML = `<i class="fas fa-book"></i>`;
+
+        // Click handler for knowledge indicator - open knowledge file
+        if (topic.hasKnowledge) {
+            knowledgeIndicator.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const filePath = `knowledge/${topic.dirName}.md`;
+                vscode.postMessage({
+                    command: 'openFile',
+                    path: filePath
+                });
+            });
+            knowledgeIndicator.style.cursor = 'pointer';
+        }
+
         // Create a container for the icons on the right
         const iconsContainer = document.createElement('div');
         iconsContainer.className = 'topic-icons';
         iconsContainer.appendChild(researchIndicator);
+        iconsContainer.appendChild(knowledgeIndicator);
         iconsContainer.appendChild(stageBadge);
 
         item.appendChild(sequence);

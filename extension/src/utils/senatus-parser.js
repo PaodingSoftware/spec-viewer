@@ -10,6 +10,7 @@ class SenatusParser {
     constructor(workspaceFolder) {
         this.workspaceFolder = workspaceFolder;
         this.specifyPath = path.join(workspaceFolder, 'specify');
+        this.knowledgePath = path.join(workspaceFolder, 'knowledge');
     }
 
     /**
@@ -104,6 +105,14 @@ class SenatusParser {
             // Check if research is completed
             const hasResearch = files.has('research.md');
 
+            // Check if knowledge summary exists (indicates completed research topic)
+            const hasKnowledge = await this.hasKnowledgeFile(dirName);
+
+            // If knowledge file exists, this is a completed research topic
+            if (hasKnowledge) {
+                finalStage = 'completed';
+            }
+
             // Calculate completion rate based on stages
             const completionRate = this.calculateCompletionRate(finalStage, planData.taskCount, planData.completedCount);
 
@@ -114,6 +123,7 @@ class SenatusParser {
                 stage: finalStage,
                 files: Array.from(files),
                 hasResearch: hasResearch,
+                hasKnowledge: hasKnowledge,
                 discussionCount: discussData.discussionCount,
                 discussions: discussData.discussions,
                 taskCount: planData.taskCount,
@@ -141,6 +151,21 @@ class SenatusParser {
             // Ignore errors
         }
         return files;
+    }
+
+    /**
+     * Check if knowledge summary file exists for a topic
+     * @param {string} dirName - Topic directory name (e.g., "001-topic-name")
+     * @returns {Promise<boolean>} True if knowledge file exists
+     */
+    async hasKnowledgeFile(dirName) {
+        try {
+            const knowledgeFilePath = path.join(this.knowledgePath, `${dirName}.md`);
+            await fs.access(knowledgeFilePath);
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
     /**

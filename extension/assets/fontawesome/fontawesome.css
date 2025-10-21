@@ -187,6 +187,10 @@
   content: "\f002";
 }
 
+.fa-book::before {
+  content: "\f02d";
+}
+
 .fa-clipboard-list::before {
   content: "\f46d";
 }

@@ -91,7 +91,7 @@ class DashboardProvider {
             this.watcher.dispose();
         }
 
-        const pattern = new vscode.RelativePattern(this.workspaceFolder, 'specify/**/*');
+        const pattern = new vscode.RelativePattern(this.workspaceFolder, '{specify,knowledge}/**/*');
         this.watcher = vscode.workspace.createFileSystemWatcher(pattern);
 
         const debouncedRefresh = () => {

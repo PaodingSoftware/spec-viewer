@@ -203,6 +203,27 @@ body {
     color: var(--color-fg-muted);
 }
 
+.knowledge-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-right: 6px;
+}
+
+.knowledge-indicator.completed {
+    background-color: #0969da;
+    color: white;
+}
+
+.knowledge-indicator.pending {
+    background-color: var(--color-neutral-muted);
+    color: var(--color-fg-muted);
+}
+
 /* Progress Bar */
 .progress-bar-container {
     margin-bottom: 16px;
