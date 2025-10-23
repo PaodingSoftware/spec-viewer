@@ -369,3 +369,53 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background-color: var(--vscode-scrollbarSlider-hoverBackground);
 }
+
+/* Graphviz styles */
+.graphviz-container {
+    margin: 16px 0;
+    padding: 16px;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 6px;
+    text-align: center;
+    overflow-x: auto;
+}
+
+.graphviz-container.graphviz-rendered {
+    background-color: var(--color-canvas-subtle);
+}
+
+.graphviz-container svg {
+    max-width: 100%;
+    height: auto;
+}
+
+.graphviz-loading {
+    color: var(--color-fg-muted);
+    font-size: 14px;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.graphviz-error {
+    color: var(--vscode-errorForeground);
+    background-color: var(--vscode-inputValidation-errorBackground);
+    border: 1px solid var(--vscode-inputValidation-errorBorder);
+    padding: 16px;
+    border-radius: 4px;
+    text-align: left;
+}
+
+.graphviz-error i {
+    margin-right: 8px;
+}
+
+.graphviz-error code {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}

@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const path = require('path');
 const fs = require('fs').promises;
 const { marked } = require('marked');
+const { instance } = require('@viz-js/viz');
 const { WebviewUtils } = require('../utils/webview-utils');
 const { ResourceUri } = require('../utils/resource-uri');
 
@@ -12,10 +13,22 @@ class FileViewerProvider {
         this.panels = new Map();
         this.panelStates = new Map();
         this.webviewUtils = new WebviewUtils(context);
+        this.vizInstance = null;
+
+        // Initialize viz.js
+        this.initViz();
 
         vscode.window.onDidChangeActiveColorTheme(() => {
             this.onThemeChanged();
         }, null, context.subscriptions);
+    }
+
+    async initViz() {
+        try {
+            this.vizInstance = await instance();
+        } catch (error) {
+            console.error('Failed to initialize viz.js:', error);
+        }
     }
 
 
@@ -98,7 +111,7 @@ class FileViewerProvider {
 
             let html;
             if (ext === '.md') {
-                const markdownHtml = marked(content);
+                const markdownHtml = await this.renderMarkdown(content);
                 html = await this.getMarkdownWebviewContent(panel, content, markdownHtml, viewMode);
             } else {
                 html = await this.getTextWebviewContent(content, path.basename(filePath));
@@ -108,6 +121,31 @@ class FileViewerProvider {
         } catch (error) {
             panel.webview.html = await this.getErrorWebviewContent(`Failed to load file: ${error.message}`);
         }
+    }
+
+    /**
+     * Render markdown with support for Graphviz DOT
+     * @param {string} content
+     * @returns {Promise<string>}
+     */
+    async renderMarkdown(content) {
+        // Configure marked with custom renderer
+        const renderer = new marked.Renderer();
+        const originalCode = renderer.code.bind(renderer);
+
+        renderer.code = (code, language) => {
+            // Check if this is a DOT/Graphviz code block
+            if (language === 'dot' || language === 'graphviz') {
+                // Wrap the DOT code in a special div that will be processed client-side
+                const escapedCode = code.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+                return `<div class="graphviz-container" data-dot="${escapedCode}"><div class="graphviz-loading">Loading graph...</div></div>`;
+            }
+            // Use default code rendering for other languages
+            return originalCode(code, language);
+        };
+
+        marked.setOptions({ renderer });
+        return marked(content);
     }
 
 
@@ -122,6 +160,7 @@ class FileViewerProvider {
             styleUri: uris.style,
             highlightThemeUri: uris.highlightTheme,
             highlightJsUri: uris.highlightJs,
+            vizJsUri: uris.vizJs,
             sharedUtilsUri: uris.sharedUtils,
             scriptUri: uris.script,
             viewMode: viewMode,

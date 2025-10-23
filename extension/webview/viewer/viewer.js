@@ -17,6 +17,7 @@ let currentOutline = [];
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     hljs.highlightAll();
+    renderGraphviz();
     generateOutline();
 });
 
@@ -26,7 +27,47 @@ function setupEventListeners() {
     setupResizeHandle();
 }
 
-function toggleViewMode() {
+async function renderGraphviz() {
+    // Check if Viz is available
+    if (typeof Viz === 'undefined') {
+        console.warn('Viz.js library not loaded');
+        return;
+    }
+
+    const containers = document.querySelectorAll('.graphviz-container');
+    if (containers.length === 0) return;
+
+    try {
+        // Initialize Viz instance (only once for all graphs)
+        const viz = await Viz.instance();
+
+        for (const container of containers) {
+            const dotCode = container.dataset.dot;
+            if (!dotCode) continue;
+
+            try {
+                // Render DOT to SVG
+                const svg = viz.renderSVGElement(dotCode);
+
+                // Clear loading message and add SVG
+                container.innerHTML = '';
+                container.appendChild(svg);
+
+                // Add rendered class
+                container.classList.add('graphviz-rendered');
+            } catch (error) {
+                console.error('Graphviz rendering error:', error);
+                container.innerHTML = `<div class="graphviz-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Failed to render Graphviz diagram:</strong><br>
+                    <code>${escapeHtml(error.message)}</code>
+                </div>`;
+            }
+        }
+    } catch (error) {
+        console.error('Failed to initialize Viz.js:', error);
+    }
+} function toggleViewMode() {
     currentViewMode = currentViewMode === 'preview' ? 'source' : 'preview';
     const isSource = currentViewMode === 'source';
 
@@ -34,7 +75,12 @@ function toggleViewMode() {
     document.getElementById('markdown-source').style.display = isSource ? 'block' : 'none';
     document.getElementById('view-toggle-text').textContent = isSource ? 'Preview' : 'Source';
 
-    if (isSource) hljs.highlightAll();
+    if (isSource) {
+        hljs.highlightAll();
+    } else {
+        // Re-render Graphviz when switching back to preview
+        renderGraphviz();
+    }
     generateOutline();
 
     // Notify extension about view mode change
