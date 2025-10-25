@@ -87,12 +87,19 @@ class FileViewerProvider {
                 await this.updatePanelContent(panel, filePath, state.viewMode);
             }
         });
+        const createListener = watcher.onDidCreate(async () => {
+            if (this.panels.has(filePath)) {
+                const state = this.panelStates.get(filePath) || { viewMode: 'preview' };
+                await this.updatePanelContent(panel, filePath, state.viewMode);
+            }
+        });
 
         // Handle panel disposal
         panel.onDidDispose(() => {
             this.panels.delete(filePath);
             this.panelStates.delete(filePath);
             changeListener.dispose();
+            createListener.dispose();
             watcher.dispose();
         }, null, this.context.subscriptions);
     }
