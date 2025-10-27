@@ -39,6 +39,25 @@
                 });
             }
         });
+
+        // Add context menu support
+        document.getElementById('file-tree').addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const treeItem = e.target.closest('.tree-item');
+            if (!treeItem) return;
+
+            const filePath = treeItem.dataset.path;
+            const isDirectory = treeItem.dataset.type === 'directory';
+
+            if (!isDirectory) {
+                showContextMenu(e.clientX, e.clientY, filePath);
+            }
+        });
+
+        // Close context menu on click outside
+        document.addEventListener('click', () => {
+            hideContextMenu();
+        });
     }
 
     function requestFileTree() {
@@ -173,6 +192,49 @@
                 }
             }
         });
+    }
+
+    function showContextMenu(x, y, filePath) {
+        hideContextMenu();
+
+        const menu = document.createElement('div');
+        menu.id = 'context-menu';
+        menu.className = 'context-menu';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+
+        const openInViewer = document.createElement('div');
+        openInViewer.className = 'context-menu-item';
+        openInViewer.innerHTML = '<i class="fas fa-eye"></i> Open in Spec Viewer';
+        openInViewer.addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'openFile',
+                path: filePath
+            });
+            hideContextMenu();
+        });
+
+        const openInEditor = document.createElement('div');
+        openInEditor.className = 'context-menu-item';
+        openInEditor.innerHTML = '<i class="fas fa-file-alt"></i> Open in Default Editor';
+        openInEditor.addEventListener('click', () => {
+            vscode.postMessage({
+                command: 'openInDefaultEditor',
+                path: filePath
+            });
+            hideContextMenu();
+        });
+
+        menu.appendChild(openInViewer);
+        menu.appendChild(openInEditor);
+        document.body.appendChild(menu);
+    }
+
+    function hideContextMenu() {
+        const existingMenu = document.getElementById('context-menu');
+        if (existingMenu) {
+            existingMenu.remove();
+        }
     }
 
 })();

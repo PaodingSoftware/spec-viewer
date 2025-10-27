@@ -118,6 +118,10 @@
   content: "\f15c";
 }
 
+.fa-eye::before {
+  content: "\f06e";
+}
+
 .fa-chevron-right::before {
   content: "\f054";
 }

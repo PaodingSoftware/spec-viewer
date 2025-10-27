@@ -87,6 +87,14 @@ class SidebarProvider {
                 case 'openFile':
                     vscode.commands.executeCommand('spec-viewer.openFile', message.path);
                     break;
+                case 'openInDefaultEditor':
+                    // Open file in VS Code's default editor
+                    const fullPath = path.join(this.workspaceFolder, message.path);
+                    const uri = vscode.Uri.file(fullPath);
+                    await vscode.window.showTextDocument(uri, {
+                        preview: false
+                    });
+                    break;
             }
         });
     }
