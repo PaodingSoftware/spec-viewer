@@ -72,6 +72,8 @@ class FileViewerProvider {
             async message => {
                 if (message.command === 'viewModeChanged') {
                     this.panelStates.set(filePath, { viewMode: message.viewMode });
+                } else if (message.command === 'openLinkedFile') {
+                    await this.handleOpenLinkedFile(filePath, message.href);
                 }
             },
             null,
@@ -155,6 +157,48 @@ class FileViewerProvider {
         return marked(content);
     }
 
+
+    /**
+     * Handle opening a linked file from markdown
+     * @param {string} currentFilePath - The path of the current file
+     * @param {string} href - The href from the clicked link (relative to workspace root)
+     */
+    async handleOpenLinkedFile(currentFilePath, href) {
+        try {
+            // Treat all paths as relative to workspace root
+            // path.join handles leading slashes automatically
+            const linkedFilePath = path.join(this.workspaceFolder, href);
+
+            // Check if the linked file is within the workspace
+            if (!linkedFilePath.startsWith(this.workspaceFolder)) {
+                vscode.window.showWarningMessage('Cannot open files outside of workspace');
+                return;
+            }
+
+            // Get relative path from workspace
+            const relativeLinkedPath = path.relative(this.workspaceFolder, linkedFilePath);
+
+            // Check if file exists
+            const fileExists = await fs.access(linkedFilePath).then(() => true).catch(() => false);
+            if (!fileExists) {
+                vscode.window.showWarningMessage(`File not found: ${relativeLinkedPath}`);
+                return;
+            }
+
+            // Determine if this should be opened in spec viewer or default editor
+            const ext = path.extname(linkedFilePath).toLowerCase();
+            if (ext === '.md') {
+                // Open in spec viewer
+                await this.openFile(relativeLinkedPath);
+            } else {
+                // Open in default VSCode editor
+                const document = await vscode.workspace.openTextDocument(linkedFilePath);
+                await vscode.window.showTextDocument(document, vscode.ViewColumn.Active);
+            }
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to open linked file: ${error.message}`);
+        }
+    }
 
     async getMarkdownWebviewContent(panel, rawContent, htmlContent, viewMode = 'preview') {
         const highlightTheme = this.getHighlightTheme();

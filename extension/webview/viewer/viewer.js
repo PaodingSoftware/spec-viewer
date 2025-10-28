@@ -25,6 +25,37 @@ function setupEventListeners() {
     document.getElementById('view-toggle')?.addEventListener('click', toggleViewMode);
     document.getElementById('outline-toggle')?.addEventListener('click', toggleOutline);
     setupResizeHandle();
+    setupLinkHandler();
+}
+
+function setupLinkHandler() {
+    // Intercept clicks on links in markdown preview
+    document.getElementById('markdown-preview')?.addEventListener('click', (e) => {
+        // Check if clicked element is a link or inside a link
+        let target = e.target;
+        while (target && target.tagName !== 'A') {
+            target = target.parentElement;
+            if (target === e.currentTarget) {
+                return;
+            }
+        }
+
+        if (target && target.tagName === 'A') {
+            const href = target.getAttribute('href');
+            if (!href) return;
+
+            // Check if this is a relative link (not http/https/mailto/etc)
+            if (!href.match(/^([a-z]+:)?\/\//i) && !href.startsWith('mailto:') && !href.startsWith('#')) {
+                e.preventDefault();
+
+                // Send message to extension to open the file
+                vscode.postMessage({
+                    command: 'openLinkedFile',
+                    href: href
+                });
+            }
+        }
+    });
 }
 
 async function renderGraphviz() {
