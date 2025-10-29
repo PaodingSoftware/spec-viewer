@@ -165,8 +165,18 @@ class FileViewerProvider {
      */
     async handleOpenLinkedFile(currentFilePath, href) {
         try {
+            // Parse line number from href
+            // Support formats: file.md#L123, file.md:123, file.md#123
             let linkedFilePath;
-            
+            let lineNumber = null;
+
+            // Extract line number if present
+            const lineMatch = href.match(/^(.+?)(?:[:#]L?(\d+))$/);
+            if (lineMatch) {
+                href = lineMatch[1];
+                lineNumber = parseInt(lineMatch[2], 10);
+            }
+
             if (path.isAbsolute(href)) {
                 // Absolute path: use as-is
                 linkedFilePath = href;
@@ -182,24 +192,18 @@ class FileViewerProvider {
                 return;
             }
 
-            // Get relative path from workspace if file is within workspace
-            let relativeLinkedPath;
-            if (linkedFilePath.startsWith(this.workspaceFolder)) {
-                relativeLinkedPath = path.relative(this.workspaceFolder, linkedFilePath);
-            } else {
-                // File is outside workspace, use absolute path
-                relativeLinkedPath = null;
-            }
+            // Open all files in default VSCode editor
+            const document = await vscode.workspace.openTextDocument(linkedFilePath);
+            const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.Active);
 
-            // Determine if this should be opened in spec viewer or default editor
-            const ext = path.extname(linkedFilePath).toLowerCase();
-            if (ext === '.md' && relativeLinkedPath) {
-                // Open markdown files in spec viewer (only if within workspace)
-                await this.openFile(relativeLinkedPath);
-            } else {
-                // Open in default VSCode editor
-                const document = await vscode.workspace.openTextDocument(linkedFilePath);
-                await vscode.window.showTextDocument(document, vscode.ViewColumn.Active);
+            // If line number is specified, move cursor to that line
+            if (lineNumber !== null && lineNumber > 0) {
+                const position = new vscode.Position(lineNumber - 1, 0);
+                editor.selection = new vscode.Selection(position, position);
+                editor.revealRange(
+                    new vscode.Range(position, position),
+                    vscode.TextEditorRevealType.InCenter
+                );
             }
         } catch (error) {
             vscode.window.showErrorMessage(`Failed to open linked file: ${error.message}`);
