@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
+    document.getElementById('refresh-btn')?.addEventListener('click', refreshFile);
     document.getElementById('view-toggle')?.addEventListener('click', toggleViewMode);
     document.getElementById('outline-toggle')?.addEventListener('click', toggleOutline);
     setupResizeHandle();
@@ -98,7 +99,27 @@ async function renderGraphviz() {
     } catch (error) {
         console.error('Failed to initialize Viz.js:', error);
     }
-} function toggleViewMode() {
+}
+
+function refreshFile() {
+    const refreshBtn = document.getElementById('refresh-btn');
+    const icon = refreshBtn.querySelector('i');
+
+    // Add spinning animation
+    icon.style.animation = 'spin 1s linear';
+
+    // Send refresh request to extension
+    vscode.postMessage({
+        command: 'refreshFile'
+    });
+
+    // Remove animation after 1 second
+    setTimeout(() => {
+        icon.style.animation = '';
+    }, 1000);
+}
+
+function toggleViewMode() {
     currentViewMode = currentViewMode === 'preview' ? 'source' : 'preview';
     const isSource = currentViewMode === 'source';
 

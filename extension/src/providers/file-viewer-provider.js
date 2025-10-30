@@ -74,6 +74,9 @@ class FileViewerProvider {
                     this.panelStates.set(filePath, { viewMode: message.viewMode });
                 } else if (message.command === 'openLinkedFile') {
                     await this.handleOpenLinkedFile(filePath, message.href);
+                } else if (message.command === 'refreshFile') {
+                    const state = this.panelStates.get(filePath) || { viewMode: 'preview' };
+                    await this.updatePanelContent(panel, filePath, state.viewMode);
                 }
             },
             null,

@@ -419,3 +419,13 @@ body {
     border-radius: 3px;
     font-size: 12px;
 }
+
+/* Refresh button animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
