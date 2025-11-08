@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     hljs.highlightAll();
     renderGraphviz();
+    renderMermaid();
     generateOutline();
 });
 
@@ -101,6 +102,54 @@ async function renderGraphviz() {
     }
 }
 
+async function renderMermaid() {
+    // Check if Mermaid is available
+    if (typeof window.mermaid === 'undefined') {
+        console.warn('Mermaid library not loaded');
+        return;
+    }
+
+    const containers = document.querySelectorAll('.mermaid-container');
+    if (containers.length === 0) return;
+
+    try {
+        // Initialize Mermaid
+        window.mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+
+        for (const container of containers) {
+            const mermaidCode = container.dataset.mermaid;
+            if (!mermaidCode) continue;
+
+            try {
+                // Generate unique ID for each diagram
+                const diagramId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+                
+                // Render Mermaid diagram
+                const { svg } = await window.mermaid.render(diagramId, mermaidCode);
+
+                // Clear loading message and set SVG
+                container.innerHTML = svg;
+
+                // Add rendered class
+                container.classList.add('mermaid-rendered');
+            } catch (error) {
+                console.error('Mermaid rendering error:', error);
+                container.innerHTML = `<div class="mermaid-error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Failed to render Mermaid diagram:</strong><br>
+                    <code>${escapeHtml(error.message)}</code>
+                </div>`;
+            }
+        }
+    } catch (error) {
+        console.error('Failed to initialize Mermaid:', error);
+    }
+}
+
 function refreshFile() {
     const refreshBtn = document.getElementById('refresh-btn');
     const icon = refreshBtn.querySelector('i');
@@ -130,8 +179,9 @@ function toggleViewMode() {
     if (isSource) {
         hljs.highlightAll();
     } else {
-        // Re-render Graphviz when switching back to preview
+        // Re-render diagrams when switching back to preview
         renderGraphviz();
+        renderMermaid();
     }
     generateOutline();
 

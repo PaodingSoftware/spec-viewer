@@ -136,7 +136,7 @@ class FileViewerProvider {
     }
 
     /**
-     * Render markdown with support for Graphviz DOT
+     * Render markdown with support for Graphviz DOT and Mermaid
      * @param {string} content
      * @returns {Promise<string>}
      */
@@ -151,6 +151,12 @@ class FileViewerProvider {
                 // Wrap the DOT code in a special div that will be processed client-side
                 const escapedCode = code.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
                 return `<div class="graphviz-container" data-dot="${escapedCode}"><div class="graphviz-loading">Loading graph...</div></div>`;
+            }
+            // Check if this is a Mermaid code block
+            if (language === 'mermaid') {
+                // Wrap the Mermaid code in a special div that will be processed client-side
+                const escapedCode = code.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+                return `<div class="mermaid-container" data-mermaid="${escapedCode}"><div class="mermaid-loading">Loading diagram...</div></div>`;
             }
             // Use default code rendering for other languages
             return originalCode(code, language);
@@ -225,6 +231,7 @@ class FileViewerProvider {
             highlightThemeUri: uris.highlightTheme,
             highlightJsUri: uris.highlightJs,
             vizJsUri: uris.vizJs,
+            mermaidJsUri: uris.mermaidJs,
             sharedUtilsUri: uris.sharedUtils,
             scriptUri: uris.script,
             viewMode: viewMode,
