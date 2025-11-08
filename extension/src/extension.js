@@ -3,6 +3,7 @@ const { SidebarProvider } = require('./providers/sidebar-provider');
 const { FileViewerProvider } = require('./providers/file-viewer-provider');
 const { DashboardProvider } = require('./providers/dashboard-provider');
 const { SenatusInstaller } = require('./utils/senatus-installer');
+const { CopilotMcpInstaller } = require('./utils/copilot-mcp-installer');
 
 let sidebarProvider = null;
 let fileViewerProvider = null;
@@ -107,6 +108,13 @@ function activate(context) {
 
             // Refresh the file tree after installation
             await refreshFileTree();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('spec-viewer.installCopilotMcp', async () => {
+            const installer = new CopilotMcpInstaller(context.extensionPath);
+            await installer.install(workspaceFolder);
         })
     );
 }

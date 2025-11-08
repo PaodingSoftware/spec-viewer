@@ -63,6 +63,12 @@
         "title": "Install Senatus Framework",
         "category": "Spec Viewer",
         "icon": "$(cloud-download)"
+      },
+      {
+        "command": "spec-viewer.installCopilotMcp",
+        "title": "Install Claude Code MCP Tools",
+        "category": "Spec Viewer",
+        "icon": "$(extensions)"
       }
     ],
     "menus": {
