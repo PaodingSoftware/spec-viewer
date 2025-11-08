@@ -33,8 +33,10 @@
                 toggleDirectory(filePath);
             } else {
                 selectFile(filePath);
+                // Open PDF files with VS Code's default editor (PDF viewer extensions)
+                const isPdf = filePath.toLowerCase().endsWith('.pdf');
                 vscode.postMessage({
-                    command: 'openFile',
+                    command: isPdf ? 'openInDefaultEditor' : 'openFile',
                     path: filePath
                 });
             }
