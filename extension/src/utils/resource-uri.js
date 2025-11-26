@@ -17,6 +17,7 @@ class ResourceUri {
             highlightJs: this._toUri(context, webview, 'assets', 'highlight.js', 'highlight.min.js'),
             vizJs: this._toUri(context, webview, 'assets', 'viz.js', 'viz-standalone.js'),
             mermaidJs: this._toUri(context, webview, 'assets', 'mermaid', 'mermaid.min.js'),
+            panzoomJs: this._toUri(context, webview, 'assets', 'panzoom', 'panzoom.min.js'),
             sharedUtils: this._toUri(context, webview, 'webview', 'shared', 'utils.js'),
             script: this._toUri(context, webview, 'webview', 'viewer', 'viewer.js')
         };

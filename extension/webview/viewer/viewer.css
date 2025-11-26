@@ -388,6 +388,8 @@ body {
 .graphviz-container svg {
     max-width: 100%;
     height: auto;
+    transform-origin: center;
+    cursor: grab;
 }
 
 .graphviz-loading {
@@ -438,6 +440,8 @@ body {
 .mermaid-container svg {
     max-width: 100%;
     height: auto;
+    transform-origin: center;
+    cursor: grab;
 }
 
 .mermaid-loading {

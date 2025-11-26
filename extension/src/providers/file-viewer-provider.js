@@ -232,6 +232,7 @@ class FileViewerProvider {
             highlightJsUri: uris.highlightJs,
             vizJsUri: uris.vizJs,
             mermaidJsUri: uris.mermaidJs,
+            panzoomJsUri: uris.panzoomJs,
             sharedUtilsUri: uris.sharedUtils,
             scriptUri: uris.script,
             viewMode: viewMode,

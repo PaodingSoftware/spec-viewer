@@ -86,6 +86,19 @@ async function renderGraphviz() {
                 container.innerHTML = '';
                 container.appendChild(svg);
 
+                // Add panzoom
+                panzoom(svg, {
+                    maxZoom: 5,
+                    minZoom: 0.1,
+                    zoomSpeed: 0.1,
+                    panSpeed: 0.5
+                });
+
+                // Add double click to reset
+                svg.addEventListener('dblclick', () => {
+                    svg.style.transform = '';
+                });
+
                 // Add rendered class
                 container.classList.add('graphviz-rendered');
             } catch (error) {
@@ -127,12 +140,29 @@ async function renderMermaid() {
             try {
                 // Generate unique ID for each diagram
                 const diagramId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
-                
+
                 // Render Mermaid diagram
                 const { svg } = await window.mermaid.render(diagramId, mermaidCode);
 
                 // Clear loading message and set SVG
                 container.innerHTML = svg;
+
+                // Get the SVG element
+                const svgElement = container.querySelector('svg');
+                if (svgElement) {
+                    // Add panzoom
+                    panzoom(svgElement, {
+                        maxZoom: 5,
+                        minZoom: 0.1,
+                        zoomSpeed: 0.1,
+                        panSpeed: 0.5
+                    });
+
+                    // Add double click to reset
+                    svgElement.addEventListener('dblclick', () => {
+                        svgElement.style.transform = '';
+                    });
+                }
 
                 // Add rendered class
                 container.classList.add('mermaid-rendered');
