@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playbook</title>
+    <link rel="stylesheet" href="{{fontAwesomeUri}}">
+    <link rel="stylesheet" href="{{sharedVariablesUri}}">
+    <link rel="stylesheet" href="{{styleUri}}">
+</head>
+
+<body>
+    <div class="playbook-container">
+        <header class="playbook-header">
+            <h1 class="playbook-title">
+                <i class="fas fa-book"></i>
+                Playbook
+            </h1>
+            <div class="header-actions">
+                <span class="key-points-count" id="key-points-count"></span>
+                <button id="refresh-btn" class="btn" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="playbook-content" id="playbook-content">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                Loading playbook...
+            </div>
+        </div>
+
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <i class="fas fa-lightbulb"></i>
+            <h2>No Key Points</h2>
+            <p>This playbook is empty.</p>
+        </div>
+    </div>
+
+    <script id="playbook-data" type="application/json">
+{{dataJson}}
+    </script>
+
+    <script src="{{scriptUri}}"></script>
+</body>
+
+</html>

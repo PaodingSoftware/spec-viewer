@@ -1,13 +1,16 @@
 const vscode = require('vscode');
+const path = require('path');
 const { SidebarProvider } = require('./providers/sidebar-provider');
 const { FileViewerProvider } = require('./providers/file-viewer-provider');
 const { DashboardProvider } = require('./providers/dashboard-provider');
+const { PlaybookProvider } = require('./providers/playbook-provider');
 const { SenatusInstaller } = require('./utils/senatus-installer');
 const { CopilotMcpInstaller } = require('./utils/copilot-mcp-installer');
 
 let sidebarProvider = null;
 let fileViewerProvider = null;
 let dashboardProvider = null;
+let playbookProvider = null;
 
 async function refreshFileTree() {
     if (sidebarProvider && sidebarProvider.view) {
@@ -74,10 +77,19 @@ function activate(context) {
     // Initialize dashboard provider
     dashboardProvider = new DashboardProvider(context, workspaceFolder);
 
+    // Initialize playbook provider
+    playbookProvider = new PlaybookProvider(context, workspaceFolder);
+
     // Register commands
     context.subscriptions.push(
         vscode.commands.registerCommand('spec-viewer.openFile', async (filePath) => {
-            await fileViewerProvider.openFile(filePath);
+            // Check if it's a playbook.json file
+            if (path.basename(filePath) === 'playbook.json') {
+                const fullPath = path.join(workspaceFolder, filePath);
+                await playbookProvider.openPlaybook(fullPath);
+            } else {
+                await fileViewerProvider.openFile(filePath);
+            }
         })
     );
 

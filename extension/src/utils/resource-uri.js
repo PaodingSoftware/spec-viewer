@@ -41,6 +41,15 @@ class ResourceUri {
             script: this._toUri(context, webview, 'webview', 'dashboard', 'dashboard.js')
         };
     }
+
+    static getPlaybookUris(context, webview) {
+        return {
+            fontAwesome: this._toUri(context, webview, 'assets', 'fontawesome', 'fontawesome.css'),
+            sharedVariables: this._toUri(context, webview, 'webview', 'shared', 'variables.css'),
+            style: this._toUri(context, webview, 'webview', 'playbook', 'playbook.css'),
+            script: this._toUri(context, webview, 'webview', 'playbook', 'playbook.js')
+        };
+    }
 }
 
 module.exports = { ResourceUri };
